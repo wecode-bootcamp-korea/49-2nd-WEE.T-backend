@@ -17,7 +17,6 @@ CREATE TABLE `users` (
 
 ALTER TABLE `users` ADD FOREIGN KEY (`social_id`) REFERENCES `socials` (`id`);
 ALTER TABLE `users` ADD FOREIGN KEY (`gender_id`) REFERENCES `gender` (`id`);
-ALTER TABLE `users` ADD FOREIGN KEY (`subscribe_id`) REFERENCES `subscribes` (`id`);
 ALTER TABLE `users` ADD FOREIGN KEY (`badge_id`) REFERENCES `badges` (`id`);
 ALTER TABLE `users` ADD UNIQUE KEY (email, social_id);  
 
