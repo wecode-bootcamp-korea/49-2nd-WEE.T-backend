@@ -1,0 +1,35 @@
+{
+  "name": "49-3rd-wee.t-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "DOTENV_CONFIG_PATH=.env.test jest --setupFiles=dotenv/config",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wecode-bootcamp-korea/49-3rd-WEE.T-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wecode-bootcamp-korea/49-3rd-WEE.T-backend/issues"
+  },
+  "homepage": "https://github.com/wecode-bootcamp-korea/49-3rd-WEE.T-backend#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dbmate": "^2.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.1",
+    "typeorm": "^0.3.17"
+  },
+  "devDependencies": {
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.1"
+  }
+}
