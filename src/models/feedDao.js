@@ -70,7 +70,7 @@ const { AppDataSource } = require("./dataSource");
         // 중복 이미지
         imageUrl = Array.from(new Set(imageUrl)).slice(0, 3);
         // challenge 체크박스 값
-        const isChallenge = challenge === '0';
+        // const isChallenge = challenge === '0';
 
         await AppDataSource.transaction(async (transactionManager) => {
             const{ insertId:feedId } = await transactionManager.query(`
@@ -82,16 +82,6 @@ const { AppDataSource } = require("./dataSource");
                 [userId, content, challenge]
             );
             for (let i = 0; i < imageUrl.length; i++){
-            const isDuplicate = await transactionManager.query(`
-                SELECT COUNT(*)
-                FROM
-                    feed_images
-                WHERE
-                    url = ?
-            `,
-                    [imageUrl[i]]
-            );
-                if(isDuplicate[0].count === 0){
                     await transactionManager.query(`
                         INSERT INTO feed_images (
                             url,
@@ -100,9 +90,8 @@ const { AppDataSource } = require("./dataSource");
                         [imageUrl[i], feedId]
                     );
                 }
-            }   
-        })
-    }
+            })
+          }   
 
     // 작성한 피드 개별 삭제
     const deleteFeeds = async(feedId) => {
@@ -129,7 +118,6 @@ const { AppDataSource } = require("./dataSource");
         `,
             [feedId]
         );
-        console.log("dao feed: ", feed)
         return feed;
     }
 
@@ -175,7 +163,7 @@ const { AppDataSource } = require("./dataSource");
 
     // 기존 이미지 삭제
     const deleteFeedImages = async(feedId, imageId) => {
-        const imageCount = await AppDataSource.query(`
+        const [imageCount] = await AppDataSource.query(`
             SELECT COUNT(*)
             AS imgCount
             FROM 
@@ -183,18 +171,18 @@ const { AppDataSource } = require("./dataSource");
             WHERE
                 feed_id = ?
         `,
-        [feedId]
+            [feedId]
         );
         
         await AppDataSource.query(`
-            DELETE FROM
-                feed_images
-            WHERE
-                feed_id = ?
-            AND
-                id = ?
-            `,
-            [feedId, imageId]
+        DELETE FROM
+        feed_images
+        WHERE
+        feed_id = ?
+        AND
+        id = ?
+        `,
+        [feedId, imageId]
         );
         return imageCount;
     }

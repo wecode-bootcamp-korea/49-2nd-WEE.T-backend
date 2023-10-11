@@ -2,12 +2,12 @@ const express = require("express");
 const { asyncWrap } = require("../utils/errorHandler");
 const { feedController } = require("../controllers");
 const feedRouter = express.Router();
+const { validateToken } = require("../utils/validateToken")
 
 feedRouter.get('', asyncWrap(feedController.getFeed));
-feedRouter.post('', asyncWrap(feedController.addFeed));
-feedRouter.delete('/:feedId', asyncWrap(feedController.deleteFeed));
-feedRouter.put(':feedId', asyncWrap(feedController.updateFeed));
-// userId token imageId body
-feedRouter.get('/rank', asyncWrap(feedController.feedRankingByFeedCount));
+feedRouter.post('', validateToken, asyncWrap(feedController.addFeed));
+feedRouter.delete('/:feedId', validateToken, asyncWrap(feedController.deleteFeed));
+feedRouter.put('/:feedId', validateToken, asyncWrap(feedController.updateFeed));
+feedRouter.get('/rank', validateToken, asyncWrap(feedController.feedRankingByFeedCount));
 
 module.exports = feedRouter;

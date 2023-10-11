@@ -1,13 +1,14 @@
 const { feedDao } = require("../models");
 const { AppDataSource } = require("../models/dataSource");
+const { deleteFeedImages } = require("../models/feedDao");
 const { throwError } = require("../utils/throwError");
 
 const getFeed = async(userId, limit, offset, page) => {
 
+    
     const getFeedList= await feedDao.getFeeds(userId, limit, offset);
     const feedCount = await feedDao.getFeedCount();
 
-    // const feeds = Array.isArray(getFeedList) ? getFeedList : [getFeedList] ;
     return { getFeedList, feedCount };
 };
 
@@ -19,37 +20,34 @@ const addFeed = async(userId, content, challenge, imageUrl) => {
     return { addFeed };
 };
 
-const deleteFeed = async(feedId) => {
+const deleteFeed = async(userId, feedId) => {
     const feed = await feedDao.getByFeedId(feedId);
-    console.log(feedId)
-    console.log(feed.is_challenge);
+    // 토큰값 컨트롤에서 가져와서 비교
+    if(userId !== feed.user_id) {
+        throwError (400, "FEED_CONNECTION_ERROR");
+    }
     if (feed.is_challenge === 1) {
         throwError (400, "CHALLENGE_ERROR");
     }
-    // 토큰값 컨트롤에서 가져와서 비교
-    // if(userId !== findFeedById[0].user_id) {
-    //     throwError (400, "FEED_CONNECTION_ERROR");
-    // }
     await feedDao.deleteFeeds(feedId);
 }
 
-const updateFeed = async(feedId, imageId, newContent, newImage) => {
-    const findFeedById = await feedDao.getByFeedId(feedId);
-    // if (userId !== findFeedById[0].user_id) {
-    //     throwError (400, "FEED_CONNECTION_ERROR");
-    // }
-    
+const updateFeed = async(user, newContent, newImage, feedId, imageId) => {
+    const feed = await feedDao.getByFeedId(feedId);
+    if (user !== feed.user_id) {
+        throwError (400, "FEED_CONNECTION_ERROR");
+    }
     if (newContent) {
         await feedDao.updateFeeds(feedId, newContent);
     }
-    if (newImage) {
+    if (newImage && newImage.length > 0) {
         await feedDao.updateImages(newImage, feedId);
     }
-    if (imageId) {    
-        if (deleteFeedImages.length === 1){
+    if (feedId && imageId) {    
+        const imageCount = await feedDao.deleteFeedImages(feedId, imageId);
+        if (imageCount.imgCount < 1){
             throwError (400, "IMG_DELETE_ERROR");
         }
-        await feedDao.deleteFeedImages(feedId, imageId);
     } 
 }
 
