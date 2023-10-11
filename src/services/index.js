@@ -1,5 +1,7 @@
+const userService = require("./userService");
 const feedService = require("./feedService");
 
 module.exports = {
-    feedService
-}
+  userService,
+  feedService,
+};

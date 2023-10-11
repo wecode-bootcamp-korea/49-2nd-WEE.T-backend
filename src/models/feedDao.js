@@ -1,15 +1,23 @@
 const { AppDataSource } = require("./dataSource");
 
-    const getFeeds = async (userId, page) => {
+    const getFeeds = async (userId, limit, offset) => {
         const Feeds = await AppDataSource.query(`
             SELECT
-                u.nickname AS nickname,
-                b.id AS badge,
-                images,
-                content,
-                is_challenge,
+                feeds.id AS id,
+                u.nickname AS userNickname,
+                b.image_url AS badge,
+                imgurl,
+                feeds.content,
+                CASE
+                    WHEN comment IS NOT NULL THEN comment
+                    ELSE 0
+                END AS comment,
+                is_challenge AS challenge, 
                 DATE_FORMAT(feeds.created_at, '%Y-%m-%d') AS created_at,
-                EXISTS (SELECT id FROM feeds WHERE user_id = ? AND id = feeds.id) AS isMyFeed
+                CASE
+                    WHEN feeds.user_id = ? THEN true
+                    ELSE false
+                END AS isMyPost
             FROM 
                 feeds 
             LEFT JOIN 
@@ -19,30 +27,46 @@ const { AppDataSource } = require("./dataSource");
             LEFT JOIN (
                 SELECT
                     feed_id,
+                    COUNT(id) AS comment
+                FROM
+                    comments
+                GROUP BY feed_id
+                    ) AS comments ON feeds.id = comments.feed_id
+            LEFT JOIN (
+                SELECT
+                    feed_id,
                 JSON_ARRAYAGG(
                     JSON_OBJECT(
                         "id" , id,
                         "url" , url
                     )
-                ) AS images
+                ) AS imgurl
                 FROM
                     feed_images
                 GROUP BY feed_id
-            ) AS images ON feeds.id = feed_images.feed_id
-            WHERE 
-                feeds.user_id = ?
-            LIMIT 10 OFFSET ?
+            ) AS feed_images ON feeds.id = feed_images.feed_id
+            ORDER BY
+                feeds.created_at DESC
+            LIMIT ? OFFSET ?
             `,
-            [userId, userId, (page - 1) * 10],
+            [userId, limit, offset]
         );
         return Feeds;
     }
 
+    // 총 피드 갯수
+    const getFeedCount = async () => {
+        const feedCount = await AppDataSource.query(`
+            SELECT COUNT(*) 
+            AS total 
+            FROM 
+                feeds
+        `);
+        return feedCount[0].total;
+      }
+
     // 피드 작성
     const addFeeds = async(userId, content, challenge, imageUrl) => {
-        if (imageUrl.length === 0 || imageUrl.length > 4) {
-            throw new Error("이미지는 1개에서 3개 사이어야 합니다.")
-        }
         // 중복 이미지
         imageUrl = Array.from(new Set(imageUrl)).slice(0, 3);
         // challenge 체크박스 값
@@ -69,42 +93,41 @@ const { AppDataSource } = require("./dataSource");
         })
     }
 
-    // 글 삭제
-    const deleteFeeds = async(feedId, userId) => {
+    // 피드 전체 삭제
+    const deleteFeeds = async(feedId, userId, challenge) => {
         const deleteFeeds = await AppDataSource.query(`
-            DELETE FROM 
-                feeds
-            WHERE 
-                id = ? 
-            AND 
-                feeds.user_id = ?
+        DELETE FROM 
+            feeds
+        WHERE 
+            id = ?
+        AND 
+            user_id = ?
+        AND
+            is_challenge = ?
         `,
-            [feedId, userId]
+            [feedId, userId, challenge]
         );
         return deleteFeeds;
     }
 
-    // 글 수정
-    const updateFeeds = async(userId, feedId, newContent, newImage) => {
-        await AppDataSource.query(async (transactionManager) => {
-            // 사용자 일치 여부
-            const [existingFeed] = await transactionManager.query(`
-                SELECT
-                    user_id 
-                FROM 
-                    feeds 
-                WHERE
-                    id = ? 
-                `,
-                [feedId]
-            );
+    const getByFeedId = async(userId) => {
+        const feed = await AppDataSource.query(`
+            SELECT
+                id, 
+                user_id
+            FROM
+                feeds
+            WHERE user_id = ?
+        `,
+            [userId]
+        );
+        console.log(feed);
+        return feed
+    }
 
-            if(!existingFeed || existingFeed.user_id !== userId) {
-                throw Error("글을 수정할 수 없습니다.");
-            }
-       
-            // 글 업데이트
-            await transactionManager.query(`
+    // 글 수정
+    const updateFeeds = async(feedId, newContent) => {
+        await AppDataSource.query(`
                 UPDATE
                     feeds
                 SET
@@ -113,41 +136,76 @@ const { AppDataSource } = require("./dataSource");
                     id = ?
                 `,
                 [newContent, feedId]
-            );
-
-            // 이미지 업데이트 (기존 이미지 삭제 후 새 이미지 추가)
-            await transactionManager.query(`
-                DELETE FROM
+        );
+    }
+    
+    // 이미지 추가  
+    const updateImages = async(newImage, feedId) => {
+        for (let i = 0; i < newImage.length; i++) {
+            const existingImage = await AppDataSource.query(`
+                SELECT
+                    id
+                FROM
                     feed_images
                 WHERE
-                    feed_id = ?
-                `,
-                [feedId]
+                    url = ? AND feed_id = ?
+            `,
+                [newImage[i], feedId]
             );
-
-            // 이미지 추가
-            for (let i = 0; i < newImage.length; i++) {
-                await transactionManager.query(`
+        
+            if (existingImage.length === 0) {
+                await AppDataSource.query(`
                     INSERT INTO
                         feed_images (url, feed_id)
-                    VALEUS (?, ?)
+                    VALUES (?, ?)
                     `,
                     [newImage[i], feedId]
                 );
             }
-       });
+        }   
+    }
+
+    // 기존 이미지 삭제
+    const deleteFeedImages = async(feedId, imageId) => {
+        const imageCount = await AppDataSource.query(`
+            SELECT COUNT(*)
+            AS imgCount
+            FROM 
+                feed_images
+            WHERE
+                feed_id = ?
+        `,
+        [feedId]
+        );
+        console.log(feedId)
+        
+        await AppDataSource.query(`
+            DELETE FROM
+                feed_images
+            WHERE
+                feed_id = ?
+            AND
+                id = ?
+            `,
+            [feedId, imageId]
+        );
+        console.log(imageCount)
+        return imageCount;
     }
 
     // 글 작성 랭킹
     const feedRanking = async () => {
         const ranking = await AppDataSource.query(`
             SELECT
-                users.nicknmae AS nickname,
-                COUNT(feed.id) AS feed_count
+                users.nickname AS nickname,
+                b.image_url AS badge,
+                COUNT(feeds.id) AS feed_count
             FROM
                 users
             LEFT JOIN
                 feeds ON users.id = feeds.user_id
+            LEFT JOIN
+                badges b ON users.badge_id = b.id
             GROUP BY
                 users.id
             ORDER BY
@@ -156,11 +214,14 @@ const { AppDataSource } = require("./dataSource");
         return ranking;
     }
 
-
 module.exports = {
     getFeeds,
+    getFeedCount,
     addFeeds,
     deleteFeeds,
+    getByFeedId,
     updateFeeds,
-    feedRanking
+    deleteFeedImages,
+    updateImages,
+    feedRanking,
 }

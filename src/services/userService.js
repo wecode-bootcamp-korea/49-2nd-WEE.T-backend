@@ -1,0 +1,60 @@
+const { userDao, subscribeDao, healthInfoDao, genderDao } = require("../models");
+const { AppDataSource } = require("../models/dataSource");
+
+const { throwError } = require("../utils/throwError");
+
+const updateUser = async (
+  nickname,
+  height,
+  weight,
+  skeletalMuscleMass,
+  goalWeight,
+  goalBodyFat,
+  goalSkeletalMuscleMass,
+  bodyFat,
+  age,
+  gender,
+  user
+) => {
+  await AppDataSource.transaction(async () => {
+    if (nickname.length > 8) throwError(400, "NICKNAME_LENGTH_EXCEEDS_8");
+
+    if (user.nickname !== nickname) {
+      const existingUser = await userDao.findUserByNickname(nickname);
+      if (existingUser) throwError(409, "DUPLICATED_NICKNAME");
+    }
+
+    const existingGender = await genderDao.findGenderByName(gender);
+    if (!existingGender) throwError(404, "GENDER_NOT_FOUND");
+
+    const startDate = new Date();
+    const formattedStartDate = startDate.toISOString().slice(0, 10);
+    const endDate = new Date(startDate);
+    const subscriptionPeriodInDays = 7;
+    endDate.setDate(startDate.getDate() + subscriptionPeriodInDays);
+    const formattedEndDate = endDate.toISOString().slice(0, 10);
+    const subscribe = await subscribeDao.createSubscribe(formattedStartDate, formattedEndDate);
+
+    const subscribeId = subscribe.insertId;
+    const birthYear = +startDate.getFullYear() - age;
+    const userId = user.id;
+    await userDao.updateUser(
+      nickname,
+      height,
+      goalWeight,
+      goalBodyFat,
+      goalSkeletalMuscleMass,
+      birthYear,
+      existingGender.id,
+      subscribeId,
+      userId
+    );
+
+    const bmi = (weight / (height / 100) ** 2).toFixed(2);
+    await healthInfoDao.createHealthInfo(weight, skeletalMuscleMass, bmi, bodyFat, userId);
+  });
+};
+
+module.exports = {
+  updateUser,
+};
