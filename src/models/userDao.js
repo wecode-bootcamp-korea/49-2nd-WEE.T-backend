@@ -44,7 +44,6 @@ const updateUser = async (
   goalSkeletalMuscleMass,
   birthYear,
   genderId,
-  subscribeId,
   userId
 ) => {
   await AppDataSource.query(
@@ -58,12 +57,30 @@ const updateUser = async (
       goal_body_fat = ?,
       goal_skeletal_muscle_mass = ?,
       birth_year = ?,
+      gender_id = ?
+    WHERE
+      id = ?
+    `,
+    [nickname, height, goalWeight, goalBodyFat, goalSkeletalMuscleMass, birthYear, genderId, userId]
+  );
+};
+
+const updateUserForSignup = async (nickname, height, goalWeight, birthYear, genderId, subscribeId, userId) => {
+  await AppDataSource.query(
+    `
+    UPDATE 
+      users
+    SET 
+      nickname = ?,
+      height = ?,
+      goal_weight = ?,
+      birth_year = ?,
       gender_id = ?,
       subscribe_id = ?
     WHERE
       id = ?
     `,
-    [nickname, height, goalWeight, goalBodyFat, goalSkeletalMuscleMass, birthYear, genderId, subscribeId, userId]
+    [nickname, height, goalWeight, birthYear, genderId, subscribeId, userId]
   );
 };
 
@@ -94,8 +111,65 @@ const findUserByNickname = async (nickname) => {
       users
     WHERE
       nickname = ?
+    LIMIT 1
     `,
     [nickname]
+  );
+
+  return user;
+};
+
+const findUserByIdWithHealthInfo = async (userId) => {
+  const [user] = await AppDataSource.query(
+    `
+    SELECT
+      u.nickname,
+      u.height,
+      h.weight,
+      h.skeletal_muscle_mass AS skeletalMuscleMass,
+      u.goal_weight AS goalWeight,
+      u.goal_body_fat AS goalBodyFat,
+      u.goal_skeletal_muscle_mass AS goalSkeletalMuscleMass,
+      h.body_fat AS bodyFat,
+      YEAR(CURDATE()) - CAST(u.birth_year AS SIGNED) AS age,
+      g.name AS gender,
+      IF(s.end_date >= CURDATE(), 1, 0) AS isSubscribe,
+      b.level AS badgeLevel,
+      b.image_url AS badgeImageUrl
+    FROM
+      users u
+    LEFT JOIN (
+      SELECT 
+        weight,
+        skeletal_muscle_mass, 
+        body_fat
+      FROM 
+        health_infos
+      WHERE 
+        user_id = ?
+      ORDER BY 
+        id DESC
+      LIMIT 1
+    ) h
+    ON
+      1 = 1
+    LEFT JOIN
+      gender g
+    ON 
+      g.id = gender_id
+    LEFT JOIN
+      subscribes s
+    ON 
+      s.id = u.subscribe_id
+    LEFT JOIN
+      badges b
+    ON 
+      b.id = badge_id
+    WHERE
+      u.id = ?
+    LIMIT 1
+    `,
+    [userId, userId]
   );
 
   return user;
@@ -105,6 +179,8 @@ module.exports = {
   createUser,
   findUserBySNS,
   updateUser,
+  updateUserForSignup,
   findUserById,
   findUserByNickname,
+  findUserByIdWithHealthInfo,
 };
