@@ -3,11 +3,11 @@ const { asyncWrap } = require("../utils/errorHandler");
 const { feedController } = require("../controllers");
 const feedRouter = express.Router();
 
-feedRouter.get('', asyncWrap(feedController.getFeedController));
-feedRouter.post('', asyncWrap(feedController.addFeedController));
-feedRouter.delete('/:feedId', asyncWrap(feedController.deleteFeedController));
-feedRouter.put('/:userId/:feedId/:imageId', asyncWrap(feedController.updateFeedController));
-feedRouter.delete('/:userId/:feedId/:imageId', asyncWrap(feedController.updateFeedController));
-feedRouter.get('/rank', asyncWrap(feedController.feedRankingController));
+feedRouter.get('', asyncWrap(feedController.getFeed));
+feedRouter.post('', asyncWrap(feedController.addFeed));
+feedRouter.delete('/:feedId', asyncWrap(feedController.deleteFeed));
+feedRouter.put(':feedId', asyncWrap(feedController.updateFeed));
+// userId token imageId body
+feedRouter.get('/rank', asyncWrap(feedController.feedRankingByFeedCount));
 
 module.exports = feedRouter;

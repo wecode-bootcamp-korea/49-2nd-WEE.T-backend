@@ -79,50 +79,58 @@ const { AppDataSource } = require("./dataSource");
                     content,
                     is_challenge
                 ) VALUES (?, ?, ?)`,
-                [userId, content, isChallenge]
+                [userId, content, challenge]
             );
             for (let i = 0; i < imageUrl.length; i++){
-                await transactionManager.query(`
-                    INSERT INTO feed_images (
-                        url,
-                        feed_id
-                    ) VALUES (?, ?)`,
-                    [imageUrl[i], feedId]
-                );
+            const isDuplicate = await transactionManager.query(`
+                SELECT COUNT(*)
+                FROM
+                    feed_images
+                WHERE
+                    url = ?
+            `,
+                    [imageUrl[i]]
+            );
+                if(isDuplicate[0].count === 0){
+                    await transactionManager.query(`
+                        INSERT INTO feed_images (
+                            url,
+                            feed_id
+                        ) VALUES (?, ?)`,
+                        [imageUrl[i], feedId]
+                    );
+                }
             }   
         })
     }
 
-    // 피드 전체 삭제
-    const deleteFeeds = async(feedId, userId, challenge) => {
+    // 작성한 피드 개별 삭제
+    const deleteFeeds = async(feedId) => {
         const deleteFeeds = await AppDataSource.query(`
         DELETE FROM 
             feeds
         WHERE 
             id = ?
-        AND 
-            user_id = ?
-        AND
-            is_challenge = ?
         `,
-            [feedId, userId, challenge]
+            [feedId]
         );
         return deleteFeeds;
     }
 
-    const getByFeedId = async(userId) => {
-        const feed = await AppDataSource.query(`
+    const getByFeedId = async(feedId) => {
+        const [feed] = await AppDataSource.query(`
             SELECT
                 id, 
-                user_id
+                user_id,
+                is_challenge
             FROM
                 feeds
-            WHERE user_id = ?
+            WHERE id = ?
         `,
-            [userId]
+            [feedId]
         );
-        console.log(feed);
-        return feed
+        console.log("dao feed: ", feed)
+        return feed;
     }
 
     // 글 수정
@@ -177,7 +185,6 @@ const { AppDataSource } = require("./dataSource");
         `,
         [feedId]
         );
-        console.log(feedId)
         
         await AppDataSource.query(`
             DELETE FROM
@@ -189,12 +196,11 @@ const { AppDataSource } = require("./dataSource");
             `,
             [feedId, imageId]
         );
-        console.log(imageCount)
         return imageCount;
     }
 
     // 글 작성 랭킹
-    const feedRanking = async () => {
+    const feedRankingByFeedCount = async () => {
         const ranking = await AppDataSource.query(`
             SELECT
                 users.nickname AS nickname,
@@ -223,5 +229,5 @@ module.exports = {
     updateFeeds,
     deleteFeedImages,
     updateImages,
-    feedRanking,
+    feedRankingByFeedCount,
 }
