@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 
+const { errorHandler } = require("./src/utils/errorHandler");
+
 const { routes } = require("./src/routes");
 
 const createApp = () => {
@@ -12,6 +14,7 @@ const createApp = () => {
   app.use(morgan("combined"));
 
   app.use(routes);
+  app.use(errorHandler);
 
   return app;
 };
