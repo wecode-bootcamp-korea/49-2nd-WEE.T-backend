@@ -55,8 +55,44 @@ const updateUser = async (nickname, height, goalWeight, birthYear, genderId, sub
   );
 };
 
+const findUserById = async (userId) => {
+  const [user] = await AppDataSource.query(
+    `
+    SELECT
+      id,
+      nickname
+    FROM
+      users
+    WHERE
+      id = ?
+    LIMIT 1
+    `,
+    [userId]
+  );
+
+  return user;
+};
+
+const findUserByNickname = async (nickname) => {
+  const [user] = await AppDataSource.query(
+    `
+    SELECT
+      id
+    FROM
+      users
+    WHERE
+      nickname = ?
+    `,
+    [nickname]
+  );
+
+  return user;
+};
+
 module.exports = {
   createUser,
   findUserBySNS,
   updateUser,
+  findUserById,
+  findUserByNickname,
 };

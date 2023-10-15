@@ -1,8 +1,28 @@
 const passport = require("passport");
 const KakaoStrategy = require("passport-kakao").Strategy;
+const JwtStrategy = require("passport-jwt").Strategy;
+const ExtractJwt = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
 
 const { userDao } = require("../models");
+
+const jwtStrategyConfig = new JwtStrategy(
+  {
+    jwtFromRequest: ExtractJwt.fromHeader("authorization"),
+    secretOrKey: process.env.SECRET_KEY,
+  },
+  async (jwt_payload, done) => {
+    const existingUser = await userDao.findUserById(jwt_payload.id);
+
+    if (!existingUser) {
+      return done(null, false);
+    }
+
+    return done(null, existingUser);
+  }
+);
+
+passport.use("jwt", jwtStrategyConfig);
 
 const kakaoStrategyConfig = new KakaoStrategy(
   {
@@ -23,8 +43,8 @@ const kakaoStrategyConfig = new KakaoStrategy(
       id = result.insertId;
     }
 
-    accessToken = jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "1h", issuer: "JeYeong" });
-    refreshToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: "14d", issuer: "JeYeong" });
+    accessToken = jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "1h" });
+    refreshToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: "14d" });
 
     return done(null, { accessToken, refreshToken });
   }
