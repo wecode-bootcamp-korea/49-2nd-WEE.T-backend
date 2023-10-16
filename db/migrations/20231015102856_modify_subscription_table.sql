@@ -1,7 +1,9 @@
 -- migrate:up
-ALTER TABLE orders DROP FOREIGN KEY orders_ibfk_3;
+SET foreign_key_checks = 0;
 ALTER TABLE subscription CHANGE id id int NOT NULL AUTO_INCREMENT;
-ALTER TABLE `orders` ADD FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`);
+SET foreign_key_checks = 1;
 
 -- migrate:down
+SET foreign_key_checks = 0;
 ALTER TABLE subscription CHANGE id id int NOT NULL;
+SET foreign_key_checks = 1;
