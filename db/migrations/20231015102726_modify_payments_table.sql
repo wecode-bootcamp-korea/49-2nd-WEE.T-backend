@@ -1,7 +1,9 @@
 -- migrate:up
-ALTER TABLE orders DROP FOREIGN KEY orders_ibfk_2;
+SET foreign_key_checks = 0;
 ALTER TABLE payments CHANGE id id int NOT NULL AUTO_INCREMENT;
-ALTER TABLE `orders` ADD FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`);
+SET foreign_key_checks = 1;
 
 -- migrate:down
+SET foreign_key_checks = 0;
 ALTER TABLE payments CHANGE id id int NOT NULL;
+SET foreign_key_checks = 1;

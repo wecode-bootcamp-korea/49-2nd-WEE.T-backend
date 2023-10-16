@@ -1,7 +1,9 @@
 -- migrate:up
-ALTER TABLE exercises DROP FOREIGN KEY exercises_ibfk_1;
+SET foreign_key_checks = 0;
 ALTER TABLE parts CHANGE id id int NOT NULL AUTO_INCREMENT;
-ALTER TABLE `exercises` ADD FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`);
+SET foreign_key_checks = 1;
 
 -- migrate:down
+SET foreign_key_checks = 0;
 ALTER TABLE parts CHANGE id id int NOT NULL;
+SET foreign_key_checks = 1;
