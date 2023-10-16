@@ -27,7 +27,8 @@ const updateUser = async (
     const startDate = new Date();
     const formattedStartDate = startDate.toISOString().slice(0, 10);
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 7);
+    const subscriptionPeriodInDays = 7;
+    endDate.setDate(startDate.getDate() + subscriptionPeriodInDays);
     const formattedEndDate = endDate.toISOString().slice(0, 10);
     const subscribe = await subscribeDao.createSubscribe(formattedStartDate, formattedEndDate);
 
