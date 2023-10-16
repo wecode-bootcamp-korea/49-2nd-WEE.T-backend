@@ -1,7 +1,9 @@
 -- migrate:up
-ALTER TABLE foods DROP FOREIGN KEY foods_ibfk_1;
+SET foreign_key_checks = 0;
 ALTER TABLE nutrition CHANGE id id int NOT NULL AUTO_INCREMENT;
-ALTER TABLE `foods` ADD FOREIGN KEY (`nutrition_id`) REFERENCES `nutrition` (`id`);
+SET foreign_key_checks = 1;
 
 -- migrate:down
+SET foreign_key_checks = 0;
 ALTER TABLE nutrition CHANGE id id int NOT NULL;
+SET foreign_key_checks = 1;
