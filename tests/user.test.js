@@ -43,7 +43,7 @@ describe("Update user info", () => {
         nickname,
         sns_id,
         social_id
-      ) VALUES ("test2@email.com", "중복된 닉네임", 13123214, 1)
+      ) VALUES ("test2@email.com", "testNick", 13123214, 1)
       `
     );
 
@@ -66,7 +66,7 @@ describe("Update user info", () => {
       .put("/users")
       .set("Authorization", accessToken)
       .send({
-        nickname: "변경된 닉네임",
+        nickname: "tester",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -85,7 +85,7 @@ describe("Update user info", () => {
     await request(app)
       .put("/users")
       .send({
-        nickname: "변경된 닉네임",
+        nickname: "tester",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -109,7 +109,7 @@ describe("Update user info", () => {
       .put("/users")
       .set("Authorization", expiredToken)
       .send({
-        nickname: "변경된 닉네임",
+        nickname: "tester",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -148,7 +148,7 @@ describe("Update user info", () => {
       .put("/users")
       .set("Authorization", accessToken)
       .send({
-        nickname: "중복된 닉네임",
+        nickname: "testNick",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -168,7 +168,7 @@ describe("Update user info", () => {
       .put("/users")
       .set("Authorization", accessToken)
       .send({
-        nickname: "닉네임 8글자이상",
+        nickname: "asdfghjkl",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -188,7 +188,7 @@ describe("Update user info", () => {
       .put("/users")
       .set("Authorization", accessToken)
       .send({
-        nickname: "변경된 닉네임",
+        nickname: "testr",
         height: 20,
         weight: 11,
         skeletalMuscleMass: 11,
@@ -197,7 +197,7 @@ describe("Update user info", () => {
         goalSkeletalMuscleMass: 21,
         bodyFat: 11,
         age: 24,
-        gender: "존재하지 않는 성별",
+        gender: "test gender",
       })
       .expect(404)
       .expect({ message: "GENDER_NOT_FOUND" });
