@@ -36,7 +36,17 @@ const findUserBySNS = async (snsId, socialId) => {
   return user;
 };
 
-const updateUser = async (nickname, height, goalWeight, birthYear, genderId, subscribeId, userId) => {
+const updateUser = async (
+  nickname,
+  height,
+  goalWeight,
+  goalBodyFat,
+  goalSkeletalMuscleMass,
+  birthYear,
+  genderId,
+  subscribeId,
+  userId
+) => {
   await AppDataSource.query(
     `
     UPDATE 
@@ -45,13 +55,15 @@ const updateUser = async (nickname, height, goalWeight, birthYear, genderId, sub
       nickname = ?,
       height = ?,
       goal_weight = ?,
+      goal_body_fat = ?,
+      goal_skeletal_muscle_mass = ?,
       birth_year = ?,
       gender_id = ?,
       subscribe_id = ?
     WHERE
       id = ?
     `,
-    [nickname, height, goalWeight, birthYear, genderId, subscribeId, userId]
+    [nickname, height, goalWeight, goalBodyFat, goalSkeletalMuscleMass, birthYear, genderId, subscribeId, userId]
   );
 };
 

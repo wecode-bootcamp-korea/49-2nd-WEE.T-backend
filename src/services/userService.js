@@ -3,7 +3,19 @@ const { AppDataSource } = require("../models/dataSource");
 
 const { throwError } = require("../utils/throwError");
 
-const updateUser = async (nickname, height, weight, skeletalMuscleMass, goalWeight, bodyFat, age, gender, user) => {
+const updateUser = async (
+  nickname,
+  height,
+  weight,
+  skeletalMuscleMass,
+  goalWeight,
+  goalBodyFat,
+  goalSkeletalMuscleMass,
+  bodyFat,
+  age,
+  gender,
+  user
+) => {
   await AppDataSource.transaction(async () => {
     if (nickname.length > 8) throwError(400, "NICKNAME_LENGTH_EXCEEDS_8");
 
@@ -24,7 +36,17 @@ const updateUser = async (nickname, height, weight, skeletalMuscleMass, goalWeig
     const subscribeId = subscribe.insertId;
     const birthYear = +startDate.getFullYear() - age;
     const userId = user.id;
-    await userDao.updateUser(nickname, height, goalWeight, birthYear, existingGender.id, subscribeId, userId);
+    await userDao.updateUser(
+      nickname,
+      height,
+      goalWeight,
+      goalBodyFat,
+      goalSkeletalMuscleMass,
+      birthYear,
+      existingGender.id,
+      subscribeId,
+      userId
+    );
 
     const bmi = (weight / (height / 100) ** 2).toFixed(2);
     await healthInfoDao.createHealthInfo(weight, skeletalMuscleMass, bmi, bodyFat, userId);
