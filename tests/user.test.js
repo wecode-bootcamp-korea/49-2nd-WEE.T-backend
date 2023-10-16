@@ -53,9 +53,9 @@ describe("Update user info", () => {
 
   afterAll(async () => {
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE users`);
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query(`TRUNCATE gender`);
-    await AppDataSource.query(`TRUNCATE users`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
     await AppDataSource.destroy();
