@@ -24,6 +24,9 @@ const updateUser = async (
       if (existingUser) throwError(409, "DUPLICATED_NICKNAME");
     }
 
+    const existingGender = await genderDao.findGenderByName(gender);
+    if (!existingGender) throwError(404, "GENDER_NOT_FOUND");
+
     const startDate = new Date();
     const formattedStartDate = startDate.toISOString().slice(0, 10);
     const endDate = new Date(startDate);
@@ -32,8 +35,6 @@ const updateUser = async (
     const formattedEndDate = endDate.toISOString().slice(0, 10);
     const subscribe = await subscribeDao.createSubscribe(formattedStartDate, formattedEndDate);
 
-    const existingGender = await genderDao.findGenderByName(gender);
-    if (!existingGender) throwError(404, "GENDER_NOT_FOUND");
     const subscribeId = subscribe.insertId;
     const birthYear = +startDate.getFullYear() - age;
     const userId = user.id;
