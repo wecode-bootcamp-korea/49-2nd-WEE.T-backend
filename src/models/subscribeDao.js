@@ -12,6 +12,32 @@ const createSubscribe = async (startDate, endDate) => {
   );
 };
 
-module.exports = {
-  createSubscribe,
+const userSubscriprionCheck = async (id) => {
+  try {
+    const query = await AppDataSource.query(
+      `
+      SELECT subscribes.end_date
+      FROM subscribes
+      JOIN users ON subscribes.id = users.id
+      WHERE users.id = ?
+    `,
+      [id]
+    );
+    return query;
+  } catch (err) {
+    console.error(err);
+  }
 };
+
+const getSubscription = async () => {
+  try {
+    const query = await AppDataSource.query(`
+      SELECT * FROM subscription;
+    `);
+    return query;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+module.exports = { createSubscribe, userSubscriprionCheck, getSubscription };
