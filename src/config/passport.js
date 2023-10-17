@@ -43,8 +43,7 @@ const kakaoStrategyConfig = new KakaoStrategy(
       id = result.insertId;
     }
 
-    accessToken = jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "1h" });
-    refreshToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: "14d" });
+    accessToken = jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "12h" });
 
     return done(null, { accessToken, refreshToken });
   }
