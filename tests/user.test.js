@@ -101,9 +101,7 @@ describe("Update user info", () => {
   });
 
   test("FAILED: jwt expires", async () => {
-    expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "1s" });
-
-    await new Promise((callback) => setTimeout(callback, 1001));
+    expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
 
     await request(app)
       .put("/users")
