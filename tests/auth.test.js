@@ -52,6 +52,7 @@ describe("Sign in social", () => {
       })
       .expect(200);
     expect(res.body.message).toEqual("LOGIN_SUCCESS");
-    expect(res.body).toHaveProperty("accessToken");
+    expect(res.body.data).toHaveProperty("accessToken");
+    expect(res.body.data).toHaveProperty("isNew");
   });
 });

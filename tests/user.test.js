@@ -181,7 +181,7 @@ describe("Update user info", () => {
         gender: "male",
       })
       .expect(400)
-      .expect({ message: "NICKNAME_LENGTH_EXCEEDS_8" });
+      .expect({ message: "NICKNAME_SHOULD_BE_LESS_THAN_OR_EQUAL_TO_8" });
   });
 
   test("FAILED: gender does not exist", async () => {
