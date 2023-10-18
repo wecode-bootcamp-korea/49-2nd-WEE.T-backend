@@ -6,4 +6,6 @@ const keyCheck = (keysObject) => {
   });
 };
 
-module.exports = { keyCheck };
+module.exports = {
+  keyCheck,
+};
