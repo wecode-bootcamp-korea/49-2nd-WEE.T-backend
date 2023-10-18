@@ -12,13 +12,14 @@ describe("Update user info", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
-    await AppDataSource.query(
+    const social = await AppDataSource.query(
       `
       INSERT INTO socials (
         name
       ) VALUES ("test")
       `
     );
+    const socialId = social.insertId;
     await AppDataSource.query(
       `
       INSERT INTO gender (
@@ -32,7 +33,7 @@ describe("Update user info", () => {
         email,
         sns_id,
         social_id
-      ) VALUES ("test@email.com", 13123214, 1)
+      ) VALUES ("test@email.com", 13123214, ${socialId})
       `
     );
 
@@ -43,7 +44,7 @@ describe("Update user info", () => {
         nickname,
         sns_id,
         social_id
-      ) VALUES ("test2@email.com", "testNick", 13123214, 1)
+      ) VALUES ("test2@email.com", "testNick", 13123214, ${socialId})
       `
     );
 
@@ -53,9 +54,11 @@ describe("Update user info", () => {
 
   afterAll(async () => {
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE health_infos`);
     await AppDataSource.query(`TRUNCATE users`);
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query(`TRUNCATE gender`);
+    await AppDataSource.query(`TRUNCATE subscribes`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
     await AppDataSource.destroy();
