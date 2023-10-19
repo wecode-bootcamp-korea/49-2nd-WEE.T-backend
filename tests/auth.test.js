@@ -121,7 +121,7 @@ describe("Sign in social Enter additional information", () => {
   test("SUCCESS: update user additional information", async () => {
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "tester",
         height: 20,
@@ -157,7 +157,7 @@ describe("Sign in social Enter additional information", () => {
 
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", expiredToken)
+      .set("authorization", expiredToken)
       .send({
         nickname: "tester",
         height: 20,
@@ -175,7 +175,7 @@ describe("Sign in social Enter additional information", () => {
   test("FAILED: key error", async () => {
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         height: 20,
         weight: 11,
@@ -192,7 +192,7 @@ describe("Sign in social Enter additional information", () => {
   test("FAILED: nickname duplicate", async () => {
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "testNick",
         height: 20,
@@ -210,7 +210,7 @@ describe("Sign in social Enter additional information", () => {
   test("FAILED: nickname length exceeds 8", async () => {
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "asdfghjkl",
         height: 20,
@@ -230,7 +230,7 @@ describe("Sign in social Enter additional information", () => {
   test("FAILED: gender does not exist", async () => {
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "testr",
         height: 20,
@@ -250,7 +250,7 @@ describe("Sign in social Enter additional information", () => {
 
     await request(app)
       .put("/auth/signup")
-      .set("Authorization", notNewUserToken)
+      .set("authorization", notNewUserToken)
       .send({
         nickname: "testr",
         height: 20,

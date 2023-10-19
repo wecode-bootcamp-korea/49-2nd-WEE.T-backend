@@ -67,7 +67,7 @@ describe("Update user info", () => {
   test("SUCCESS: update user", async () => {
     await request(app)
       .put("/users")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "tester",
         height: 20,
@@ -108,7 +108,7 @@ describe("Update user info", () => {
 
     await request(app)
       .put("/users")
-      .set("Authorization", expiredToken)
+      .set("authorization", expiredToken)
       .send({
         nickname: "tester",
         height: 20,
@@ -128,7 +128,7 @@ describe("Update user info", () => {
   test("FAILED: key error", async () => {
     await request(app)
       .put("/users")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         height: 20,
         weight: 11,
@@ -147,7 +147,7 @@ describe("Update user info", () => {
   test("FAILED: nickname duplicate", async () => {
     await request(app)
       .put("/users")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "testNick",
         height: 20,
@@ -167,7 +167,7 @@ describe("Update user info", () => {
   test("FAILED: nickname length exceeds 8", async () => {
     await request(app)
       .put("/users")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "asdfghjkl",
         height: 20,
@@ -187,7 +187,7 @@ describe("Update user info", () => {
   test("FAILED: gender does not exist", async () => {
     await request(app)
       .put("/users")
-      .set("Authorization", accessToken)
+      .set("authorization", accessToken)
       .send({
         nickname: "testr",
         height: 20,
