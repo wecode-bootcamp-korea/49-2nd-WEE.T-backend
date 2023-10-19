@@ -73,8 +73,20 @@ const getUserInfo = async (req, res) => {
   });
 };
 
+const getUserGrade = async (req, res) => {
+  const { id: userId } = req.user;
+
+  const user = await userService.getUserGrade(userId);
+
+  res.status(200).json({
+    message: "READ_SUCCESS",
+    data: user,
+  });
+};
+
 module.exports = {
   updateUser,
   checkDuplicatedNickname,
   getUserInfo,
+  getUserGrade,
 };

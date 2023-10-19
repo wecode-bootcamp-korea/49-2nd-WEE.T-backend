@@ -2,7 +2,6 @@ const moment = require("moment");
 
 const { userDao, subscribeDao, healthInfoDao, genderDao } = require("../models");
 const { AppDataSource } = require("../models/dataSource");
-
 const { throwError } = require("../utils/throwError");
 const { validateUserInfo, validateMaxOrEqualValue } = require("../utils/validateInput");
 
@@ -98,9 +97,14 @@ const getUserInfo = async (userId) => {
   return await userDao.findUserByIdWithHealthInfo(userId);
 };
 
+const getUserGrade = async (userId) => {
+  return await userDao.findUserByIdWithBadge(userId);
+};
+
 module.exports = {
   updateUser,
   signup,
   checkDuplicatedNickname,
   getUserInfo,
+  getUserGrade,
 };

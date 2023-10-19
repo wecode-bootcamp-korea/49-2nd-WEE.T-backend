@@ -2,7 +2,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
 const { createApp } = require("../app");
-const { AppDataSource } = require("../src/models/dataSource");
+const { AppDataSource, client } = require("../src/models/dataSource");
 
 describe("Update user info", () => {
   let app;
@@ -12,6 +12,8 @@ describe("Update user info", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
+
     const social = await AppDataSource.query(
       `
       INSERT INTO socials (
@@ -20,6 +22,7 @@ describe("Update user info", () => {
       `
     );
     const socialId = social.insertId;
+
     await AppDataSource.query(
       `
       INSERT INTO gender (
@@ -61,6 +64,7 @@ describe("Update user info", () => {
     await AppDataSource.query(`TRUNCATE subscribes`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -213,6 +217,7 @@ describe("Nickname duplicate check", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
 
     const social = await AppDataSource.query(
       `
@@ -244,6 +249,7 @@ describe("Nickname duplicate check", () => {
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -320,6 +326,7 @@ describe("View user information", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
 
     const social = await AppDataSource.query(
       `
@@ -379,7 +386,7 @@ describe("View user information", () => {
     );
     userId = user.insertId;
 
-    const healthInfo = await AppDataSource.query(
+    await AppDataSource.query(
       `
       INSERT INTO health_infos (
         weight,
@@ -401,10 +408,10 @@ describe("View user information", () => {
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query(`TRUNCATE badges`);
     await AppDataSource.query(`TRUNCATE subscribes`);
-    await AppDataSource.query(`TRUNCATE badges`);
     await AppDataSource.query(`TRUNCATE gender`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -429,25 +436,92 @@ describe("View user information", () => {
   });
 
   test("FAILED: no token", async () => {
-    await request(app)
-      .post("/users/nickname")
-      .send({
-        nickname: "tester",
-      })
-      .expect(401)
-      .expect({ message: "UNAUTHORIZED" });
+    await request(app).get("/users").expect(401).expect({ message: "UNAUTHORIZED" });
   });
 
   test("FAILED: jwt expires", async () => {
     const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
 
-    await request(app)
-      .post("/users/nickname")
-      .set("authorization", expiredToken)
-      .send({
-        nickname: "tester",
-      })
-      .expect(401)
-      .expect({ message: "JWT_EXPIRED" });
+    await request(app).get("/users").set("authorization", expiredToken).expect(401).expect({ message: "JWT_EXPIRED" });
+  });
+});
+
+describe("View user grade", () => {
+  let app;
+  let userId;
+  let accessToken;
+
+  beforeAll(async () => {
+    app = createApp();
+    await AppDataSource.initialize();
+    await client.connect();
+
+    const social = await AppDataSource.query(
+      `
+      INSERT INTO socials (
+        name
+      ) VALUES ("test")
+      `
+    );
+    const socialId = social.insertId;
+
+    const badge = await AppDataSource.query(
+      `
+      INSERT INTO badges (
+        level,
+        image_url
+      ) VALUES (1, "urlurlurl")
+      `
+    );
+    const badgeId = badge.insertId;
+
+    const user = await AppDataSource.query(
+      `
+      INSERT INTO users (
+        email,
+        nickname,
+        sns_id,
+        social_id,
+        badge_id
+      ) VALUES ("test@email.com", "testNick", 13123214, ${socialId}, ${badgeId})
+      `
+    );
+    userId = user.insertId;
+
+    accessToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "1h" });
+  });
+
+  afterAll(async () => {
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE users`);
+    await AppDataSource.query(`TRUNCATE socials`);
+    await AppDataSource.query(`TRUNCATE badges`);
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
+
+    await client.disconnect();
+    await AppDataSource.destroy();
+  });
+
+  test("SUCCESS: view user grade information", async () => {
+    const res = await request(app).get("/users/grades").set("authorization", accessToken).expect(200);
+    expect(res.body.message).toEqual("READ_SUCCESS");
+    expect(res.body.data).toEqual({
+      nickname: "testNick",
+      badgeImageUrl: "urlurlurl",
+    });
+  });
+
+  test("FAILED: no token", async () => {
+    await request(app).get("/users/grades").expect(401).expect({
+      message: "UNAUTHORIZED",
+    });
+  });
+
+  test("FAILED: jwt expires", async () => {
+    const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
+
+    await request(app).get("/users/grades").set("authorization", expiredToken).expect(401).expect({
+      message: "JWT_EXPIRED",
+    });
   });
 });
