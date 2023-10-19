@@ -111,6 +111,7 @@ const findUserByNickname = async (nickname) => {
       users
     WHERE
       nickname = ?
+    LIMIT 1
     `,
     [nickname]
   );
