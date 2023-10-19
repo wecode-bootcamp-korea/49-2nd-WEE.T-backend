@@ -204,3 +204,110 @@ describe("Update user info", () => {
       .expect({ message: "GENDER_NOT_FOUND" });
   });
 });
+
+describe("Nickname duplicate check", () => {
+  let app;
+  let userId;
+  let accessToken;
+
+  beforeAll(async () => {
+    app = createApp();
+    await AppDataSource.initialize();
+
+    const social = await AppDataSource.query(
+      `
+      INSERT INTO socials (
+        name
+      ) VALUES ("test")
+      `
+    );
+    const socialId = social.insertId;
+
+    const user = await AppDataSource.query(
+      `
+      INSERT INTO users (
+        email,
+        nickname,
+        sns_id,
+        social_id
+      ) VALUES ("test@email.com", "testNick", 13123214, ${socialId})
+      `
+    );
+
+    userId = user.insertId;
+    accessToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "1h" });
+  });
+
+  afterAll(async () => {
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE users`);
+    await AppDataSource.query(`TRUNCATE socials`);
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
+
+    await AppDataSource.destroy();
+  });
+
+  test("SUCCESS: duplicate check", async () => {
+    await request(app)
+      .post("/users/nickname")
+      .set("authorization", accessToken)
+      .send({
+        nickname: "tester",
+      })
+      .expect(200)
+      .expect({ message: "AVAILABLE_NICKNAME" });
+  });
+
+  test("FAILED: no token", async () => {
+    await request(app)
+      .post("/users/nickname")
+      .send({
+        nickname: "tester",
+      })
+      .expect(401)
+      .expect({ message: "UNAUTHORIZED" });
+  });
+
+  test("FAILED: jwt expires", async () => {
+    const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
+
+    await request(app)
+      .post("/users/nickname")
+      .set("authorization", expiredToken)
+      .send({
+        nickname: "tester",
+      })
+      .expect(401)
+      .expect({ message: "JWT_EXPIRED" });
+  });
+
+  test("FAILED: key error", async () => {
+    await request(app)
+      .post("/users/nickname")
+      .set("authorization", accessToken)
+      .expect(400)
+      .expect({ message: "KEY_ERROR: nickname" });
+  });
+
+  test("FAILED: nickname duplicate", async () => {
+    await request(app)
+      .post("/users/nickname")
+      .set("authorization", accessToken)
+      .send({
+        nickname: "testNick",
+      })
+      .expect(409)
+      .expect({ message: "DUPLICATED_NICKNAME" });
+  });
+
+  test("FAILED: nickname length exceeds 8", async () => {
+    await request(app)
+      .post("/users/nickname")
+      .set("authorization", accessToken)
+      .send({
+        nickname: "asdfghjkl",
+      })
+      .expect(400)
+      .expect({ message: "NICKNAME_SHOULD_BE_LESS_THAN_OR_EQUAL_TO_8" });
+  });
+});
