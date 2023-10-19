@@ -1,8 +1,8 @@
-const { AppDataSource } = require ("./AppdataSource")
+const { AppDataSource } = require ("./dataSource")
 
 // 댓글 조회 
-const getComment = async (nickname, userId, feedId, content, createAt, isMyComment) => {
-    await AppDataSource.query (`
+const getCommentByUser  = async (nickname, userId, feedId, content, createAt, isMyComment) => {
+    return await AppDataSource.query (`
 SELECT 
    c.id AS id,
    u.nickname AS nickname,
@@ -22,27 +22,26 @@ ORDER BY
    comments.created_at DESC;`
    ,
    [nickname, userId, feedId, content, createAt, isMyComment]
-   
     );
 };
 
 // 댓글 작성 
-const createComment = async (content, userId, feedId, createAt) => {
+const writeUserComment = async (content, userId, feedId) => {
     await AppDataSource.query(`
     INSERT INTO comments 
-     (content, user_id, feed_id, created_at) 
+     (content, user_id, feed_id) 
     VALUES 
-     (?, ?, ?, ?);
+     (?, ?, ?);
      `
      ,
-     [content, userId, feedId, createAt]
+     [content, userId, feedId]
 
 );
 
 };
 
 // 댓글 수정 
-const editComment = async (userId, feedId) => {
+const updateEditComment = async (userId, feedId) => {
     await AppDataSource.query(`
     UPDATE 
      comments 
@@ -59,7 +58,7 @@ const editComment = async (userId, feedId) => {
 };
 
 // 댓글 삭제
-const deletComment = async (userId) => {
+const userDeletComment = async (userId) => {
     await AppDataSource.query(`
     DELETE FROM 
     comments 
@@ -70,9 +69,9 @@ const deletComment = async (userId) => {
     ); 
 };
 
-module.export = {
-  getComment,
-  createComment,
-  editComment,
-  deletComment
+module.exports = {
+  writeUserComment,
+  getCommentByUser ,
+  updateEditComment,
+  userDeletComment,
 }; 
