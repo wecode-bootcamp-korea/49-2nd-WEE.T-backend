@@ -87,7 +87,7 @@ const signup = async (nickname, height, weight, skeletalMuscleMass, goalWeight, 
   });
 };
 
-const duplicateNicknameCheck = async (nickname) => {
+const checkDuplicatedNickname = async (nickname) => {
   validateMaxOrEqualValue(nickname.length, "nickname", 8);
 
   const existingUser = await userDao.findUserByNickname(nickname);
@@ -97,5 +97,5 @@ const duplicateNicknameCheck = async (nickname) => {
 module.exports = {
   updateUser,
   signup,
-  duplicateNicknameCheck,
+  checkDuplicatedNickname,
 };

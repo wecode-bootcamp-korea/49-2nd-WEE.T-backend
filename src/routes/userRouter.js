@@ -7,6 +7,6 @@ const { validateToken } = require("../utils/validateToken");
 const userRouter = express.Router();
 
 userRouter.put("/", validateToken, asyncWrap(userController.updateUser));
-userRouter.post("/nickname", validateToken, asyncWrap(userController.duplicateNicknameCheck));
+userRouter.post("/nickname", validateToken, asyncWrap(userController.checkDuplicatedNickname));
 
 module.exports = userRouter;
