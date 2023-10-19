@@ -4,7 +4,7 @@ const { userDao, subscribeDao, healthInfoDao, genderDao } = require("../models")
 const { AppDataSource } = require("../models/dataSource");
 
 const { throwError } = require("../utils/throwError");
-const { validateUserInfo } = require("../utils/validateInput");
+const { validateUserInfo, validateMaxOrEqualValue } = require("../utils/validateInput");
 
 const updateUser = async (
   nickname,
@@ -87,7 +87,15 @@ const signup = async (nickname, height, weight, skeletalMuscleMass, goalWeight, 
   });
 };
 
+const duplicateNicknameCheck = async (nickname) => {
+  validateMaxOrEqualValue(nickname.length, "nickname", 8);
+
+  const existingUser = await userDao.findUserByNickname(nickname);
+  if (existingUser) throwError(409, "DUPLICATED_NICKNAME");
+};
+
 module.exports = {
   updateUser,
   signup,
+  duplicateNicknameCheck,
 };
