@@ -2,13 +2,13 @@ const { userService } = require("../services");
 const { keyCheck } = require("../utils/keyCheck");
 
 const socialLogin = async (req, res) => {
-  const result = req.user;
+  const user = req.user;
 
   res.status(200).json({
     message: "LOGIN_SUCCESS",
     data: {
-      accessToken: result.accessToken,
-      isNew: result.isNew,
+      accessToken: user.accessToken,
+      isNew: user.isNew,
     },
   });
 };
