@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 const { userDao, subscribeDao, healthInfoDao, genderDao } = require("../models");
 const { AppDataSource } = require("../models/dataSource");
 
@@ -38,8 +40,8 @@ const updateUser = async (
     const existingGender = await genderDao.findGenderByName(gender);
     if (!existingGender) throwError(404, "GENDER_NOT_FOUND");
 
-    const currentDate = new Date();
-    const birthYear = +currentDate.getFullYear() - age;
+    const now = moment();
+    const birthYear = now.format("YYYY") - age;
     const userId = user.id;
     await userDao.updateUser(
       nickname,
@@ -69,15 +71,14 @@ const signup = async (nickname, height, weight, skeletalMuscleMass, goalWeight, 
     const existingGender = await genderDao.findGenderByName(gender);
     if (!existingGender) throwError(404, "GENDER_NOT_FOUND");
 
-    const startDate = new Date();
-    const formattedStartDate = startDate.toISOString().slice(0, 10);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 7);
-    const formattedEndDate = endDate.toISOString().slice(0, 10);
-    const subscribe = await subscribeDao.createSubscribe(formattedStartDate, formattedEndDate);
+    const now = moment();
+    const startDate = now.format("YYYY-MM-DD");
+    const subscriptionPeriod = 7;
+    const endDate = now.clone().add(subscriptionPeriod, "days").format("YYYY-MM-DD");
+    const subscribe = await subscribeDao.createSubscribe(startDate, endDate);
 
     const subscribeId = subscribe.insertId;
-    const birthYear = +startDate.getFullYear() - age;
+    const birthYear = now.format("YYYY") - age;
     const userId = user.id;
     await userDao.updateUserForSignup(nickname, height, goalWeight, birthYear, existingGender.id, subscribeId, userId);
 
