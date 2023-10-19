@@ -19,22 +19,27 @@ INNER JOIN
 WHERE 
     comments.feed_id = feeds.id 
 ORDER BY
-   comments.created_at DESC;
-  
+   comments.created_at DESC;`
+   ,
+   [nickname, userId, feedId, content, createAt, isMyComment]
+   
+    );
+};
 
-    `)
-
-}
 // 댓글 작성 
-const createComment = async (feedId, content) => {
+const createComment = async (content, userId, feedId, createAt) => {
     await AppDataSource.query(`
     INSERT INTO comments 
      (content, user_id, feed_id, created_at) 
     VALUES 
      (?, ?, ?, ?);
-`)
+     `
+     ,
+     [content, userId, feedId, createAt]
 
-}
+);
+
+};
 
 // 댓글 수정 
 const editComment = async (userId, feedId) => {
@@ -47,8 +52,11 @@ const editComment = async (userId, feedId) => {
      id = ?
     AND
      user_id = ?
-    `)
-}
+    `
+    ,
+    [userId, feedId]
+    );
+};
 
 // 댓글 삭제
 const deletComment = async (userId) => {
@@ -56,8 +64,11 @@ const deletComment = async (userId) => {
     DELETE FROM 
     comments 
     WHERE id = ?
-  `)  
-} 
+    `
+    ,
+    [userId]
+    ); 
+};
 
 module.export = {
   getComment,
