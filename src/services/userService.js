@@ -94,8 +94,13 @@ const checkDuplicatedNickname = async (nickname) => {
   if (existingUser) throwError(409, "DUPLICATED_NICKNAME");
 };
 
+const getUserInfo = async (userId) => {
+  return await userDao.findUserByIdWithOthers(userId);
+};
+
 module.exports = {
   updateUser,
   signup,
   checkDuplicatedNickname,
+  getUserInfo,
 };

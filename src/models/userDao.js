@@ -119,6 +119,62 @@ const findUserByNickname = async (nickname) => {
   return user;
 };
 
+const findUserByIdWithOthers = async (userId) => {
+  const [user] = await AppDataSource.query(
+    `
+    SELECT
+      u.nickname,
+      u.height,
+      h.weight,
+      h.skeletal_muscle_mass AS skeletalMuscleMass,
+      u.goal_weight AS goalWeight,
+      u.goal_body_fat AS goalBodyFat,
+      u.goal_skeletal_muscle_mass AS goalSkeletalMuscleMass,
+      h.body_fat AS bodyFat,
+      YEAR(CURDATE()) - CAST(u.birth_year AS SIGNED) AS age,
+      g.name AS gender,
+      IF(s.end_date >= CURDATE(), 1, 0) AS isSubscribe,
+      b.level AS badgeLevel,
+      b.image_url AS badgeImageUrl
+    FROM
+      users u
+    LEFT JOIN (
+      SELECT 
+        weight,
+        skeletal_muscle_mass, 
+        body_fat
+      FROM 
+        health_infos
+      WHERE 
+        user_id = ?
+      ORDER BY 
+        id DESC
+      LIMIT 1
+    ) h
+    ON
+      1 = 1
+    LEFT JOIN
+      gender g
+    ON 
+      g.id = gender_id
+    LEFT JOIN
+      subscribes s
+    ON 
+      s.id = u.subscribe_id
+    LEFT JOIN
+      badges b
+    ON 
+      b.id = badge_id
+    WHERE
+      u.id = ?
+    LIMIT 1
+    `,
+    [userId, userId]
+  );
+
+  return user;
+};
+
 module.exports = {
   createUser,
   findUserBySNS,
@@ -126,4 +182,5 @@ module.exports = {
   updateUserForSignup,
   findUserById,
   findUserByNickname,
+  findUserByIdWithOthers,
 };
