@@ -20,6 +20,7 @@ describe("Update user info", () => {
       `
     );
     const socialId = social.insertId;
+
     await AppDataSource.query(
       `
       INSERT INTO gender (
