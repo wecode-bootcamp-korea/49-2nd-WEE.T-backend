@@ -119,7 +119,7 @@ const findUserByNickname = async (nickname) => {
   return user;
 };
 
-const findUserByIdWithOthers = async (userId) => {
+const findUserByIdWithHealthInfo = async (userId) => {
   const [user] = await AppDataSource.query(
     `
     SELECT
@@ -182,5 +182,5 @@ module.exports = {
   updateUserForSignup,
   findUserById,
   findUserByNickname,
-  findUserByIdWithOthers,
+  findUserByIdWithHealthInfo,
 };

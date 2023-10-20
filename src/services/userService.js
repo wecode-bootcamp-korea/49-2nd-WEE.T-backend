@@ -95,7 +95,7 @@ const checkDuplicatedNickname = async (nickname) => {
 };
 
 const getUserInfo = async (userId) => {
-  return await userDao.findUserByIdWithOthers(userId);
+  return await userDao.findUserByIdWithHealthInfo(userId);
 };
 
 module.exports = {
