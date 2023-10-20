@@ -44,7 +44,6 @@ const updateUser = async (
   goalSkeletalMuscleMass,
   birthYear,
   genderId,
-  subscribeId,
   userId
 ) => {
   await AppDataSource.query(
@@ -58,12 +57,30 @@ const updateUser = async (
       goal_body_fat = ?,
       goal_skeletal_muscle_mass = ?,
       birth_year = ?,
+      gender_id = ?
+    WHERE
+      id = ?
+    `,
+    [nickname, height, goalWeight, goalBodyFat, goalSkeletalMuscleMass, birthYear, genderId, userId]
+  );
+};
+
+const updateUserForSignup = async (nickname, height, goalWeight, birthYear, genderId, subscribeId, userId) => {
+  await AppDataSource.query(
+    `
+    UPDATE 
+      users
+    SET 
+      nickname = ?,
+      height = ?,
+      goal_weight = ?,
+      birth_year = ?,
       gender_id = ?,
       subscribe_id = ?
     WHERE
       id = ?
     `,
-    [nickname, height, goalWeight, goalBodyFat, goalSkeletalMuscleMass, birthYear, genderId, subscribeId, userId]
+    [nickname, height, goalWeight, birthYear, genderId, subscribeId, userId]
   );
 };
 
@@ -94,6 +111,7 @@ const findUserByNickname = async (nickname) => {
       users
     WHERE
       nickname = ?
+    LIMIT 1
     `,
     [nickname]
   );
@@ -105,6 +123,7 @@ module.exports = {
   createUser,
   findUserBySNS,
   updateUser,
+  updateUserForSignup,
   findUserById,
   findUserByNickname,
 };

@@ -48,6 +48,21 @@ const updateUser = async (req, res) => {
   });
 };
 
+const checkDuplicatedNickname = async (req, res) => {
+  const { nickname } = req.body;
+
+  keyCheck({
+    nickname,
+  });
+
+  await userService.checkDuplicatedNickname(nickname);
+
+  res.status(200).json({
+    message: "AVAILABLE_NICKNAME",
+  });
+};
+
 module.exports = {
   updateUser,
+  checkDuplicatedNickname,
 };

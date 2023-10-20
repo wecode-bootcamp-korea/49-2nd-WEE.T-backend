@@ -1,24 +1,12 @@
 const express = require("express");
-const passport = require("passport");
-
-const userRouter = express.Router();
 
 const { userController } = require("../controllers");
 const { asyncWrap } = require("../utils/errorHandler");
+const { validateToken } = require("../utils/validateToken");
 
-userRouter.put(
-  "/",
-  (req, res, next) => {
-    passport.authenticate("jwt", { session: false }, (err, user, info) => {
-      const message = info?.expiredAt ? info.message.toUpperCase().replaceAll(" ", "_") : "UNAUTHORIZED";
-      if (!user) return res.status(401).json({ message });
+const userRouter = express.Router();
 
-      req.user = user;
-
-      next();
-    })(req, res, next);
-  },
-  asyncWrap(userController.updateUser)
-);
+userRouter.put("/", validateToken, asyncWrap(userController.updateUser));
+userRouter.post("/nickname", validateToken, asyncWrap(userController.checkDuplicatedNickname));
 
 module.exports = userRouter;

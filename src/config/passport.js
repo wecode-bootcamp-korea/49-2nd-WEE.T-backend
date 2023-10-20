@@ -18,6 +18,8 @@ const jwtStrategyConfig = new JwtStrategy(
       return done(null, false);
     }
 
+    existingUser.isNew = jwt_payload.isNew;
+
     return done(null, existingUser);
   }
 );
@@ -37,16 +39,17 @@ const kakaoStrategyConfig = new KakaoStrategy(
     const existingUser = await userDao.findUserBySNS(snsId, socialId);
 
     let id = existingUser?.id;
+    let isNew = false;
 
     if (!existingUser) {
       const result = await userDao.createUser(email, snsId, socialId);
       id = result.insertId;
+      isNew = true;
     }
 
-    accessToken = jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "1h" });
-    refreshToken = jwt.sign({}, process.env.SECRET_KEY, { expiresIn: "14d" });
+    accessToken = jwt.sign({ id, isNew }, process.env.SECRET_KEY, { expiresIn: "12h" });
 
-    return done(null, { accessToken, refreshToken });
+    return done(null, { accessToken, isNew });
   }
 );
 
