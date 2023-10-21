@@ -39,8 +39,6 @@ describe("Get subscription", () => {
         expiresIn: "1h",
       }
     );
-
-    console.log("토큰: ", token);
   });
   afterAll(async () => {
     await AppDataSource.query(`SET foreign_key_checks = 0;`);
