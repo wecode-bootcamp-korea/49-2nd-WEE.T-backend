@@ -1,12 +1,13 @@
 const express = require("express");
-const { validateToken } = require("../middlewares/validateToken");
+const { validateToken } = require("../utils/validateToken");
+const { asyncWrap } = require("../utils/errorHandler");
 const { subscribeController } = require("../controllers");
 const subscribeRouter = express.Router();
 
 subscribeRouter.get(
   "/",
   validateToken,
-  subscribeController.showSubscriptionPlans
+  asyncWrap(subscribeController.showSubscriptionPlans)
 );
 
 module.exports = subscribeRouter;
