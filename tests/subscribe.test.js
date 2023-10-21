@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const { createApp } = require("../app");
 const { AppDataSource } = require("../src/models/dataSource");
 
-describe("get subscription", () => {
+describe("Get subscription", () => {
   let app;
   let token;
 
@@ -50,7 +50,7 @@ describe("get subscription", () => {
     await AppDataSource.query(`TRUNCATE users`);
     await AppDataSource.destroy();
   });
-  test("SUCCESS: get subscription", async () => {
+  test("SUCCESS: Get subscription", async () => {
     await request(app)
       .get("/subscribe/")
       .set("Authorization", token)
