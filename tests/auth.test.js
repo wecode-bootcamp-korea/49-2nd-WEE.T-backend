@@ -3,7 +3,7 @@ const nock = require("nock");
 const jwt = require("jsonwebtoken");
 
 const { createApp } = require("../app");
-const { AppDataSource } = require("../src/models/dataSource");
+const { AppDataSource, client } = require("../src/models/dataSource");
 
 describe("Sign in social", () => {
   let app;
@@ -12,6 +12,8 @@ describe("Sign in social", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
+
     await AppDataSource.query(
       `
       INSERT INTO socials (
@@ -42,6 +44,7 @@ describe("Sign in social", () => {
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -66,6 +69,8 @@ describe("Sign in social Enter additional information", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
+
     const social = await AppDataSource.query(
       `
       INSERT INTO socials (
@@ -115,6 +120,7 @@ describe("Sign in social Enter additional information", () => {
     await AppDataSource.query(`TRUNCATE subscribes`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 

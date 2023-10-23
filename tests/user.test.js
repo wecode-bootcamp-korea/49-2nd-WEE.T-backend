@@ -2,7 +2,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 
 const { createApp } = require("../app");
-const { AppDataSource } = require("../src/models/dataSource");
+const { AppDataSource, client } = require("../src/models/dataSource");
 
 describe("Update user info", () => {
   let app;
@@ -12,6 +12,8 @@ describe("Update user info", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
+
     const social = await AppDataSource.query(
       `
       INSERT INTO socials (
@@ -62,6 +64,7 @@ describe("Update user info", () => {
     await AppDataSource.query(`TRUNCATE subscribes`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -214,6 +217,7 @@ describe("Nickname duplicate check", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
 
     const social = await AppDataSource.query(
       `
@@ -245,6 +249,7 @@ describe("Nickname duplicate check", () => {
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
@@ -321,6 +326,7 @@ describe("View user information", () => {
   beforeAll(async () => {
     app = createApp();
     await AppDataSource.initialize();
+    await client.connect();
 
     const social = await AppDataSource.query(
       `
@@ -380,7 +386,7 @@ describe("View user information", () => {
     );
     userId = user.insertId;
 
-    const healthInfo = await AppDataSource.query(
+    await AppDataSource.query(
       `
       INSERT INTO health_infos (
         weight,
@@ -406,6 +412,7 @@ describe("View user information", () => {
     await AppDataSource.query(`TRUNCATE gender`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
+    await client.disconnect();
     await AppDataSource.destroy();
   });
 
