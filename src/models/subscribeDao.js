@@ -25,7 +25,7 @@ const getSubscribeInfoByUserId = async (id) => {
 
 const getSubscription = async () => {
   const query = await AppDataSource.query(`
-    SELECT * FROM subscription;
+    SELECT s.id, s.month, s.price FROM subscription s;
   `);
   return query;
 };
