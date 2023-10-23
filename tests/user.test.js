@@ -20,6 +20,7 @@ describe("Update user info", () => {
       `
     );
     const socialId = social.insertId;
+
     await AppDataSource.query(
       `
       INSERT INTO gender (
@@ -429,25 +430,12 @@ describe("View user information", () => {
   });
 
   test("FAILED: no token", async () => {
-    await request(app)
-      .post("/users/nickname")
-      .send({
-        nickname: "tester",
-      })
-      .expect(401)
-      .expect({ message: "UNAUTHORIZED" });
+    await request(app).get("/users").expect(401).expect({ message: "UNAUTHORIZED" });
   });
 
   test("FAILED: jwt expires", async () => {
     const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
 
-    await request(app)
-      .post("/users/nickname")
-      .set("authorization", expiredToken)
-      .send({
-        nickname: "tester",
-      })
-      .expect(401)
-      .expect({ message: "JWT_EXPIRED" });
+    await request(app).get("/users").set("authorization", expiredToken).expect(401).expect({ message: "JWT_EXPIRED" });
   });
 });
