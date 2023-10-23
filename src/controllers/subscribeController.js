@@ -1,4 +1,4 @@
-const subscribeService = require("../services/subscribeService");
+const { subscribeService } = require("../services");
 const { subscriptionCheck, showSubscription } = subscribeService;
 
 const showSubscriptionPlans = async (req, res) => {
