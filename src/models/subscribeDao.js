@@ -10,7 +10,7 @@ const createSubscribe = async (startDate, endDate) => {
   );
 };
 
-const userSubscriprionCheck = async (id) => {
+const getSubscribeInfoByUserId = async (id) => {
   const query = await AppDataSource.query(
     `
     SELECT subscribes.end_date
@@ -30,4 +30,4 @@ const getSubscription = async () => {
   return query;
 };
 
-module.exports = { createSubscribe, userSubscriprionCheck, getSubscription };
+module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription };

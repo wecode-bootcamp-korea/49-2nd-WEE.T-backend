@@ -1,8 +1,8 @@
-const subscripbeDao = require("../models/subscribeDao");
-const { userSubscriprionCheck, getSubscription } = subscripbeDao;
+const { subscribeDao } = require("../models");
+const { getSubscribeInfoByUserId, getSubscription } = subscribeDao;
 
 const subscriptionCheck = async (id) => {
-  const [subscriptionDuration] = await userSubscriprionCheck(id);
+  const [subscriptionDuration] = await getSubscribeInfoByUserId(id);
   const today = new Date();
   const usersubscriprion = new Date(subscriptionDuration.end_date);
 
