@@ -175,6 +175,28 @@ const findUserByIdWithHealthInfo = async (userId) => {
   return user;
 };
 
+const findUserByIdWithBadge = async (userId) => {
+  const [user] = await AppDataSource.query(
+    `
+    SELECT
+      u.nickname,
+      b.image_url AS badgeImageUrl
+    FROM
+      users u
+    LEFT JOIN
+      badges b
+    ON
+      b.id = u.badge_id
+    WHERE
+      u.id = ?
+    LIMIT 1
+    `,
+    [userId]
+  );
+
+  return user;
+};
+
 module.exports = {
   createUser,
   findUserBySNS,
@@ -183,4 +205,5 @@ module.exports = {
   findUserById,
   findUserByNickname,
   findUserByIdWithHealthInfo,
+  findUserByIdWithBadge,
 };
