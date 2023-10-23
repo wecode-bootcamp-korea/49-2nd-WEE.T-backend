@@ -97,9 +97,14 @@ const getUserInfo = async (userId) => {
   return await userDao.findUserByIdWithHealthInfo(userId);
 };
 
+const getUserGrade = async (userId) => {
+  return await userDao.findUserByIdWithBadge(userId);
+};
+
 module.exports = {
   updateUser,
   signup,
   checkDuplicatedNickname,
   getUserInfo,
+  getUserGrade,
 };
