@@ -1,7 +1,7 @@
 const { subscribeService } = require("../services");
 const { subscriptionCheck, showSubscription } = subscribeService;
 
-const showSubscriptionPlans = async (req, res) => {
+const getSubscriptionPlans = async (req, res) => {
   const subscription = await showSubscription();
 
   res.status(200).json({
@@ -15,4 +15,4 @@ const showSubscriptionPlans = async (req, res) => {
     }),
   });
 };
-module.exports = { showSubscriptionPlans };
+module.exports = { getSubscriptionPlans };

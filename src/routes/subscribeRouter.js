@@ -4,10 +4,6 @@ const { asyncWrap } = require("../utils/errorHandler");
 const { subscribeController } = require("../controllers");
 const subscribeRouter = express.Router();
 
-subscribeRouter.get(
-  "/",
-  validateToken,
-  asyncWrap(subscribeController.showSubscriptionPlans)
-);
+subscribeRouter.get("/", validateToken, asyncWrap(subscribeController.getSubscriptionPlans));
 
 module.exports = subscribeRouter;
