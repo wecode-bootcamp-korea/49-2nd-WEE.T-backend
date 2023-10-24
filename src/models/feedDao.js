@@ -205,7 +205,9 @@ const { AppDataSource } = require("./dataSource");
             GROUP BY
                 users.id
             ORDER BY
-                feed_count DESC;
+                feed_count DESC
+            LIMIT
+                10;
         `)
         return ranking;
     }
