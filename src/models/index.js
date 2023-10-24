@@ -3,6 +3,7 @@ const feedDao = require("./feedDao");
 const subscribeDao = require("./subscribeDao");
 const healthInfoDao = require("./healthInfoDao");
 const genderDao = require("./genderDao");
+const trainingDao = require("./trainingDao");
 
 module.exports = {
   userDao,
@@ -10,4 +11,5 @@ module.exports = {
   healthInfoDao,
   genderDao,
   feedDao,
+  trainingDao,
 };

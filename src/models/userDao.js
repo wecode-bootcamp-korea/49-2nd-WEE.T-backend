@@ -171,7 +171,6 @@ const findUserByIdWithHealthInfo = async (userId) => {
     `,
     [userId, userId]
   );
-
   return user;
 };
 

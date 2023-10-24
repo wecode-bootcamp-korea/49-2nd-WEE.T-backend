@@ -2,10 +2,11 @@ const { feedService } = require("../services");
 const { keyCheck } = require("../utils/keyCheck");
 
 const getFeed = async(req, res) => {
-    const user = req.headers.Authorization;
-    const { page = 1, limit =10 } = req.query;
-    const offset = (page -1) * limit
-    const feedData = await feedService.getFeed(limit, offset, page);
+    // const user = req.headers.Authorization;
+    const user = req.params.userId;
+    const { page = 1 } = req.query;
+    const limit = 10;
+    const feedData = await feedService.getFeed(user, limit, page);
 
     return res.status(200).json({
         message : "READ_SUCCESS",
@@ -14,12 +15,19 @@ const getFeed = async(req, res) => {
 };
 
 const addFeed = async(req, res) => {
-    const { content, challenge, imageUrl } = req.body;
+    console.log("파일즈",req.files)
+    console.log("파일", req.file);
+    
+    const imageUrls = []
+    for (let i = 0; i < req.files.length; i++) {
+        imageUrls.push(req.files[i].location);
+    }
+    const { content, challenge } = req.body;
     const user = req.user.id;
-    keyCheck ({content, challenge, imageUrl});
-    const addFeed = await feedService.addFeed(user, content, challenge, imageUrl);
+    keyCheck ({content, challenge});
+    const addFeed = await feedService.addFeed(user, content, challenge, imageUrls);
 
-    res.status(201).json({
+    res.status(200).json({
         message : "INSERT_SUCCESS",
         data : addFeed,
     });
@@ -40,10 +48,14 @@ const deleteFeed = async(req, res) => {
 const updateFeed = async(req, res) => {
     const user = req.user.id;
     const feedId = req.params.feedId;
-    const { newContent, newImage, imageId } = req.body;
-    keyCheck ({feedId, newContent, newImage});
+    const { newContent, imageId } = req.body;
+    const imageUrls = []
+    for (let i = 0; i < req.files.length; i++) {
+        imageUrls.push(req.files[i].location);
+    }
+    keyCheck ({feedId});
 
-    const updateFeed = await feedService.updateFeed(user, newContent, newImage, feedId, imageId);
+    const updateFeed = await feedService.updateFeed(user, newContent, imageUrls, feedId, imageId);
 
     return res.status(200).json({
         message : "UPDATE_SUCCESS",
@@ -52,7 +64,7 @@ const updateFeed = async(req, res) => {
 };
 
 const feedRankingByFeedCount = async(req, res) => {
-    const feedRanking = await feedService.feedRankingService();
+    const feedRanking = await feedService.feedRankingByFeedCount();
 
     return res.status(200).json({
         message : "RANKLIST_SUCCESS",
