@@ -408,7 +408,6 @@ describe("View user information", () => {
     await AppDataSource.query(`TRUNCATE socials`);
     await AppDataSource.query(`TRUNCATE badges`);
     await AppDataSource.query(`TRUNCATE subscribes`);
-    await AppDataSource.query(`TRUNCATE badges`);
     await AppDataSource.query(`TRUNCATE gender`);
     await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
 
@@ -444,5 +443,85 @@ describe("View user information", () => {
     const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
 
     await request(app).get("/users").set("authorization", expiredToken).expect(401).expect({ message: "JWT_EXPIRED" });
+  });
+});
+
+describe("View user grade", () => {
+  let app;
+  let userId;
+  let accessToken;
+
+  beforeAll(async () => {
+    app = createApp();
+    await AppDataSource.initialize();
+    await client.connect();
+
+    const social = await AppDataSource.query(
+      `
+      INSERT INTO socials (
+        name
+      ) VALUES ("test")
+      `
+    );
+    const socialId = social.insertId;
+
+    const badge = await AppDataSource.query(
+      `
+      INSERT INTO badges (
+        level,
+        image_url
+      ) VALUES (1, "urlurlurl")
+      `
+    );
+    const badgeId = badge.insertId;
+
+    const user = await AppDataSource.query(
+      `
+      INSERT INTO users (
+        email,
+        nickname,
+        sns_id,
+        social_id,
+        badge_id
+      ) VALUES ("test@email.com", "testNick", 13123214, ${socialId}, ${badgeId})
+      `
+    );
+    userId = user.insertId;
+
+    accessToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "1h" });
+  });
+
+  afterAll(async () => {
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE users`);
+    await AppDataSource.query(`TRUNCATE socials`);
+    await AppDataSource.query(`TRUNCATE badges`);
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
+
+    await client.disconnect();
+    await AppDataSource.destroy();
+  });
+
+  test("SUCCESS: view user grade information", async () => {
+    const res = await request(app).get("/users/grades").set("authorization", accessToken).expect(200);
+    expect(res.body.message).toEqual("READ_SUCCESS");
+    expect(res.body.data).toEqual({
+      nickname: "testNick",
+      badgeImageUrl: "urlurlurl",
+    });
+  });
+
+  test("FAILED: no token", async () => {
+    await request(app).get("/users/grades").expect(401).expect({
+      message: "UNAUTHORIZED",
+    });
+  });
+
+  test("FAILED: jwt expires", async () => {
+    const expiredToken = jwt.sign({ id: userId }, process.env.SECRET_KEY, { expiresIn: "0s" });
+
+    await request(app).get("/users/grades").set("authorization", expiredToken).expect(401).expect({
+      message: "JWT_EXPIRED",
+    });
   });
 });
