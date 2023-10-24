@@ -51,6 +51,7 @@ const { AppDataSource } = require("./dataSource");
             `,
             [userId, limit, (page - 1) * 10]
         );
+        console.log('확인', Feeds);
         return Feeds;
     }
 

@@ -32,8 +32,11 @@ const validateToken = async (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (err, user, info) => {
     const message = info?.expiredAt ? info.message.toUpperCase().replaceAll(" ", "_") : "UNAUTHORIZED";
 
-    if (!user) {
-      if (permitCheck(req.method, req.originalUrl)) return next();
+    if(!user) {
+      if (permitCheck(req.method, req.originalUrl)){
+        req.user = user;
+       return next();
+    }
 
       return res.status(401).json({ message });
     }
