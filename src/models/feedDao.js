@@ -60,7 +60,7 @@ const { AppDataSource } = require("./dataSource");
         const feedCount = await AppDataSource.query(`
             SELECT COUNT(*) 
             AS total 
-            FROM 
+            FROM  
                 feeds
         `);
         return feedCount[0].total;
