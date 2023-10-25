@@ -2,8 +2,7 @@ const { feedService } = require("../services");
 const { keyCheck } = require("../utils/keyCheck");
 
 const getFeed = async(req, res) => {
-    // const user = req.headers.Authorization;
-    const user = req.params.userId;
+    const user = req.user.id;
     const { page = 1 } = req.query;
     const limit = 10;
     const feedData = await feedService.getFeed(user, limit, page);
@@ -15,9 +14,6 @@ const getFeed = async(req, res) => {
 };
 
 const addFeed = async(req, res) => {
-    console.log("파일즈",req.files)
-    console.log("파일", req.file);
-    
     const imageUrls = []
     for (let i = 0; i < req.files.length; i++) {
         imageUrls.push(req.files[i].location);
