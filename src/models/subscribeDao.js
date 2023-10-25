@@ -30,4 +30,15 @@ const getSubscription = async () => {
   return query;
 };
 
-module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription };
+const createOrder = async (userId, orderNumber) => {
+  const query = await AppDataSource.query(
+    `
+    INSERT INTO orders (user_id, order_id)
+    VALUES (?, ?);
+  `,
+    [userId, orderNumber]
+  );
+  return orderNumber;
+};
+
+module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription, createOrder };

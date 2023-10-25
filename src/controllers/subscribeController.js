@@ -15,4 +15,14 @@ const getSubscriptionPlans = async (req, res) => {
     }),
   });
 };
-module.exports = { getSubscriptionPlans };
+
+const createOrder = async (req, res) => {
+  const { id } = req.user;
+
+  res.status(200).json({
+    orderId: await subscribeService.createOrder(id),
+    message: "CREATE_ORDER_SUCCESS",
+  });
+};
+
+module.exports = { getSubscriptionPlans, createOrder };
