@@ -15,7 +15,7 @@ const getSubscribeInfoByUserId = async (id) => {
     `
     SELECT subscribes.end_date
     FROM subscribes
-    JOIN users ON subscribes.id = users.id
+    JOIN users ON subscribes.id = users.subscribe_id
     WHERE users.id = ?
   `,
     [id]
@@ -30,4 +30,15 @@ const getSubscription = async () => {
   return query;
 };
 
-module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription };
+const createOrder = async (userId, orderNumber) => {
+  const query = await AppDataSource.query(
+    `
+    INSERT INTO orders (user_id, order_id)
+    VALUES (?, ?);
+  `,
+    [userId, orderNumber]
+  );
+  return orderNumber;
+};
+
+module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription, createOrder };
