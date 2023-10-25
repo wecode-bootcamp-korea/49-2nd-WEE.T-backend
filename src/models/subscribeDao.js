@@ -15,7 +15,7 @@ const getSubscribeInfoByUserId = async (id) => {
     `
     SELECT subscribes.end_date
     FROM subscribes
-    JOIN users ON subscribes.id = users.id
+    JOIN users ON subscribes.id = users.subscribe_id
     WHERE users.id = ?
   `,
     [id]
