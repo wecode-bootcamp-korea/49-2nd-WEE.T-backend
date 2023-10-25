@@ -6,7 +6,7 @@ const passport = require("passport");
 const { errorHandler } = require("./src/utils/errorHandler");
 require("./src/config/passport");
 
-const routes = require("./src/routes");
+const router = require("./src/routes");
 
 const createApp = () => {
   const app = express();
@@ -16,7 +16,7 @@ const createApp = () => {
   app.use(morgan("dev"));
   app.use(passport.initialize());
 
-  app.use(routes);
+  app.use(router);
   app.use(errorHandler);
 
   return app;

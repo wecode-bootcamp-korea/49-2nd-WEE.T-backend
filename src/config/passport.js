@@ -68,28 +68,24 @@ const naverStrategyConfig = new NaverStrategy(
     callbackURL: process.env.NAVER_CALLBACK_URL,
   },
   async (accessToken, refreshToken, profile, done) => {
-    try {
-      const email = profile.emails[0].value;
-      const snsId = profile.id;
-      const socialId = socialType.naver;
+    const email = profile.emails[0].value;
+    const snsId = profile.id;
+    const socialId = socialType.naver;
 
-      const existingUser = await userDao.findUserBySNS(snsId, socialId);
+    const existingUser = await userDao.findUserBySNS(snsId, socialId);
 
-      let id = existingUser?.id;
-      let isNew = false;
+    let id = existingUser?.id;
+    let isNew = false;
 
-      if (!existingUser) {
-        const result = await userDao.createUser(email, snsId, socialId);
-        id = result.insertId;
-        isNew = true;
-      }
-
-      accessToken = jwt.sign({ id, isNew }, process.env.SECRET_KEY, { expiresIn: "1h" });
-
-      return done(null, { accessToken, isNew });
-    } catch (error) {
-      return done(err);
+    if (!existingUser) {
+      const result = await userDao.createUser(email, snsId, socialId);
+      id = result.insertId;
+      isNew = true;
     }
+
+    accessToken = jwt.sign({ id, isNew }, process.env.SECRET_KEY, { expiresIn: "1h" });
+
+    return done(null, { accessToken, isNew });
   }
 );
 
