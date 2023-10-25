@@ -1,10 +1,16 @@
 const passport = require("passport");
 const KakaoStrategy = require("passport-kakao").Strategy;
+const NaverStrategy = require("passport-naver").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const jwt = require("jsonwebtoken");
 
 const { userDao } = require("../models");
+
+const socialType = {
+  kakao: 1,
+  naver: 2,
+};
 
 const jwtStrategyConfig = new JwtStrategy(
   {
@@ -34,7 +40,7 @@ const kakaoStrategyConfig = new KakaoStrategy(
   async (accessToken, refreshToken, profile, done) => {
     const email = profile._json.kakao_account.email;
     const snsId = profile.id;
-    const socialId = 1;
+    const socialId = socialType.kakao;
 
     const existingUser = await userDao.findUserBySNS(snsId, socialId);
 
@@ -54,3 +60,33 @@ const kakaoStrategyConfig = new KakaoStrategy(
 );
 
 passport.use("kakao", kakaoStrategyConfig);
+
+const naverStrategyConfig = new NaverStrategy(
+  {
+    clientID: process.env.NAVER_CLIENT_ID,
+    clientSecret: process.env.NAVER_CLIENT_SECRET,
+    callbackURL: process.env.NAVER_CALLBACK_URL,
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    const email = profile.emails[0].value;
+    const snsId = profile.id;
+    const socialId = socialType.naver;
+
+    const existingUser = await userDao.findUserBySNS(snsId, socialId);
+
+    let id = existingUser?.id;
+    let isNew = false;
+
+    if (!existingUser) {
+      const result = await userDao.createUser(email, snsId, socialId);
+      id = result.insertId;
+      isNew = true;
+    }
+
+    accessToken = jwt.sign({ id, isNew }, process.env.SECRET_KEY, { expiresIn: "1h" });
+
+    return done(null, { accessToken, isNew });
+  }
+);
+
+passport.use("naver", naverStrategyConfig);
