@@ -1,4 +1,5 @@
-const { DataSource } = require('typeorm');
+const { DataSource } = require("typeorm");
+const { createClient } = require("redis");
 
 const AppDataSource = new DataSource({
   type: process.env.TYPEORM_CONNECTION,
@@ -12,4 +13,13 @@ const AppDataSource = new DataSource({
   logging: true,
 });
 
-module.exports = { AppDataSource };
+const client = createClient({
+  url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}/${process.env.REDIS_DATABASE}`,
+});
+
+client.on("error", (err) => console.log("Redis Client Error", err));
+
+module.exports = {
+  AppDataSource,
+  client,
+};
