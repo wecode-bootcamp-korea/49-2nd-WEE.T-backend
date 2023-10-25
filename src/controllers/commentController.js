@@ -3,61 +3,61 @@ const { commentService } = require("../services");
 const { keyCheck } = require("../utils/keyCheck");
 
   const getCommentByUser  = async (req, res) => { 
-  const user = req.headers.Authorization;
-  const getComment = await commentService.getCommentByUser(user);
-
+  const userId = req.user.id;
+  const feedId = req.query.feedId;
+  const getComment = await commentService.getCommentByUser(userId, feedId);
+  console.log("컨트롤러", userId, feedId)
+  console.log('확인', getComment);
  // 댓글이 있는 경우
-    return res.status(200).json({
+    res.status(200).json({
     massage: 'READ_SUCCESS',
-    data: getComment
+    data: getComment,
     });
 }
 
   const writeUserComment = async (req, res) => {  
   const userId = req.user.id;
   const { content, feedId } = req.body;
-
+  console.log("확인", userId , feedId);
   keyCheck ({ content });
 
   const createComment = await commentService.writeUserComment(content, userId, feedId);
 
   // 
-  return res.status(200).json({
-  massage: 'CREATE_SUCCESS',
-  date: createComment 
-             
+  res.status(200).json({
+  massage: 'CREATE_SUCCESS'          
     });
 } 
         
         
   const updateEditComment = async (req, res ) => { 
-  const user = req.user.id;
-  keyCheck ({user, feedId});
-  
-
-  const updateEditComment = await commentService.updateEditComment(user,feedId)
+    const {content} = req.body;
+    const contentId = req.params.contentId
+    const user = req.user.id;
+    console.log('con', user, content, contentId);
+    keyCheck ({user, contentId});
+    const updateEditComment = await commentService.updateEditComment(content, contentId, user)
        
    
-  return res.status(200).json({
-  massage: "UPDATE_SUCCESS",
-  date: updateEditComment
+    res.status(200).json({
+    massage: "UPDATE_SUCCESS",
+    date: updateEditComment
         
-    });
+  });
 }
 
  const userDeletComment = async (req, res) => {
  const user = req.user.id;
- const feedId = req.paramas.feed.id;
+ const feedId = req.query.feedId;
         
- const userDeletComment = await commentService.deletComment(user, feedId);
+ const userDeletComment = await commentService.userDeletComment(feedId);
+    
+  res.status(200).json({ 
+  massage: 'DELETE_SUCCESS',
 
-     
-     res.status(200).json({ 
-     massage: 'DELETE_SUCCESS',
-     data: userDeletComment
 
-      });   
-    }
+    });   
+  }
 
 module.exports = {
     getCommentByUser,

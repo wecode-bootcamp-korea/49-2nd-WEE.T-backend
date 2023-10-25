@@ -1,33 +1,33 @@
 const { AppDataSource } = require ("./dataSource")
 
 // 댓글 조회 
-const getCommentByUser  = async (nickname, userId, feedId, content, createAt, isMyComment) => {
-    return await AppDataSource.query (`
+const getCommentByUser  = async (userId, feedId) => {
+const getComment = await AppDataSource.query (`
 SELECT 
-   c.id AS id,
-   u.nickname AS nickname,
-   c.content AS content,
-   c.created_at AS createAt,
-   b.image_url AS badge,
-   c.user_id = users.id AS isMyComment
+ c.id AS id,
+ u.nickname AS nickname,
+ c.content AS content,
+ c.created_at AS createAt,
+ b.image_url AS badge,
+ c.user_id AS isMyComment
 FROM
-  	comments 
-INNER JOIN 
-   users u ON comments.user_id = u.id 
-INNER JOIN
-   badges b ON u.badge_id = b.id
-WHERE 
-    comments.feed_id = feeds.id 
-ORDER BY
-   comments.created_at DESC;`
-   ,
-   [nickname, userId, feedId, content, createAt, isMyComment]
+  comments AS c  
+LEFT JOIN 
+ users AS u ON c.user_id = u.id 
+ LEFT JOIN
+ feeds AS f ON c.feed_id = f.id
+ LEFT JOIN
+ badges AS b ON u.badge_id = b.id
+ WHERE c.user_id = ? AND c.feed_id = ?`,
+    [userId, feedId],
     );
+    return getComment;
 };
 
 // 댓글 작성 
 const writeUserComment = async (content, userId, feedId) => {
-    await AppDataSource.query(`
+    console.log(feedId);
+    return await AppDataSource.query(`
     INSERT INTO comments 
      (content, user_id, feed_id) 
     VALUES 
@@ -35,37 +35,52 @@ const writeUserComment = async (content, userId, feedId) => {
      `
      ,
      [content, userId, feedId]
-
 );
-
 };
 
+//피드아이디 불러오기
+const findFeedById = async (feedId) => {
+  const [feed] = await AppDataSource.query(
+    `
+    SELECT 
+     id
+    FROM
+    feeds
+    WHERE
+    id = ? 
+    `,
+    [feedId]
+  )
+  return feed;
+}
+
 // 댓글 수정 
-const updateEditComment = async (userId, feedId) => {
+const updateEditComment = async (content, contentId, userId) => {
     await AppDataSource.query(`
     UPDATE 
-     comments 
-    SET 
-     content = ?
+     comments c
+    SET
+      c.content = ?
     WHERE 
-     id = ?
+      c.id = ?
     AND
-     user_id = ?
+      c.user_id = ?
     `
     ,
-    [userId, feedId]
+    [content,contentId,userId]
     );
 };
 
 // 댓글 삭제
-const userDeletComment = async (userId) => {
+const userDeletComment = async (feedId) => {
     await AppDataSource.query(`
     DELETE FROM 
-    comments 
-    WHERE id = ?
+     comments 
+    WHERE 
+     id = ?
     `
     ,
-    [userId]
+    [feedId]
     ); 
 };
 
@@ -74,4 +89,5 @@ module.exports = {
   getCommentByUser ,
   updateEditComment,
   userDeletComment,
+  findFeedById,
 }; 

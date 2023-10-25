@@ -6,9 +6,9 @@ const { validateToken } = require("../utils/validateToken");
 
 const commentRouter = express.Router();
 
-commentRouter.get('', asyncWrap(commentController.getCommentByUser));
+commentRouter.get('', validateToken, asyncWrap(commentController.getCommentByUser));
 commentRouter.post('',validateToken, asyncWrap(commentController.writeUserComment));
-commentRouter.put('/:feedId',validateToken, asyncWrap(commentController.updateEditComment));
-commentRouter.delete('/:feedId',validateToken, asyncWrap(commentController.userDeletComment));
+commentRouter.put('/:contentId',validateToken, asyncWrap(commentController.updateEditComment));
+commentRouter.delete('',validateToken, asyncWrap(commentController.userDeletComment));
 
 module.exports = commentRouter ;
