@@ -1,3 +1,4 @@
+-- SQLBook: Code
 -- migrate:up
 CREATE TABLE `comments` (
   `id` int PRIMARY KEY NOT NULL,

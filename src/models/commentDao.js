@@ -26,7 +26,6 @@ LEFT JOIN
 
 // 댓글 작성 
 const writeUserComment = async (content, userId, feedId) => {
-    console.log(feedId);
     return await AppDataSource.query(`
     INSERT INTO comments 
      (content, user_id, feed_id) 

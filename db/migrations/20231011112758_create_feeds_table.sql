@@ -1,3 +1,4 @@
+-- SQLBook: Code
 -- migrate:up
 CREATE TABLE `feeds` (
   `id` int PRIMARY KEY NOT NULL,

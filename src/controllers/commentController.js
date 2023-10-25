@@ -6,8 +6,6 @@ const { keyCheck } = require("../utils/keyCheck");
   const userId = req.user.id;
   const feedId = req.query.feedId;
   const getComment = await commentService.getCommentByUser(userId, feedId);
-  console.log("컨트롤러", userId, feedId)
-  console.log('확인', getComment);
  // 댓글이 있는 경우
     res.status(200).json({
     massage: 'READ_SUCCESS',
@@ -30,13 +28,12 @@ const { keyCheck } = require("../utils/keyCheck");
 } 
         
         
-  const updateEditComment = async (req, res ) => { 
+  const updateEditComment = async (req, res ) => {
     const {content} = req.body;
-    const contentId = req.params.contentId
+    const commentId = req.query.commentId
     const user = req.user.id;
-    console.log('con', user, content, contentId);
-    keyCheck ({user, contentId});
-    const updateEditComment = await commentService.updateEditComment(content, contentId, user)
+    keyCheck ({user, commentId});
+    const updateEditComment = await commentService.updateEditComment(content, commentId, user)
        
    
     res.status(200).json({
@@ -48,9 +45,9 @@ const { keyCheck } = require("../utils/keyCheck");
 
  const userDeletComment = async (req, res) => {
  const user = req.user.id;
- const feedId = req.query.feedId;
+ const commentId = req.query.commentId;
         
- const userDeletComment = await commentService.userDeletComment(feedId);
+ const userDeletComment = await commentService.userDeletComment(commentId);
     
   res.status(200).json({ 
   massage: 'DELETE_SUCCESS',

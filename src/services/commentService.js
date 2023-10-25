@@ -7,7 +7,6 @@ const getCommentByUser = async ( userId, feedId) => {
   const getComment = await commentDao.getCommentByUser(userId, feedId);
   if (!getComment) throwError(400,'COMMENT_NOT_FOUND' );
   
-  console.log("서비스확인", getComment);
   return getComment;
 } 
 
@@ -28,13 +27,12 @@ const writeUserComment = async ( content, userId, feedId) => {
 
 const updateEditComment = async (content, contentId, userId ) => {
     const editComment = await commentDao.updateEditComment(content, contentId, userId);
-    console.log('ser', userId, contentId, content);
     // if (userId !== editComment.user_id) throwError(400, "COMMENT_ERROR");
     // if (content.length > 0) throwError(400, "NOT_FOUND_CONTNET");
 }    
 
-const userDeletComment = async (feedId) => {
-    const deletComment = await commentDao.userDeletComment(feedId);
+const userDeletComment = async (commentId) => {
+    const deletComment = await commentDao.userDeletComment(commentId);
      if (deletComment === 0) throwError(400, "NOT_FOUND_COMMENT");  //댓글을 찾지 못한 경우
      
     }     
