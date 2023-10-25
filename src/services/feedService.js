@@ -1,12 +1,10 @@
 const { feedDao } = require("../models");
-const { AppDataSource } = require("../models/dataSource");
-const { deleteFeedImages } = require("../models/feedDao");
 const { throwError } = require("../utils/throwError");
 
-const getFeed = async(userId, limit, offset, page) => {
+const getFeed = async(userId, limit, page) => {
 
-    
-    const getFeedList= await feedDao.getFeeds(userId, limit, offset);
+
+    const getFeedList= await feedDao.getFeeds(userId, limit, page);
     const feedCount = await feedDao.getFeedCount();
 
     return { getFeedList, feedCount };

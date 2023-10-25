@@ -1,6 +1,6 @@
 const { AppDataSource } = require("./dataSource");
 
-    const getFeeds = async (userId, limit, offset) => {
+    const getFeeds = async (userId, limit, page) => {
         const Feeds = await AppDataSource.query(`
             SELECT
                 feeds.id AS id,
@@ -49,7 +49,7 @@ const { AppDataSource } = require("./dataSource");
                 feeds.created_at DESC
             LIMIT ? OFFSET ?
             `,
-            [userId, limit, offset]
+            [userId, limit, (page - 1) * 10]
         );
         return Feeds;
     }
@@ -72,7 +72,7 @@ const { AppDataSource } = require("./dataSource");
         // challenge 체크박스 값
         // const isChallenge = challenge === '0';
 
-        await AppDataSource.transaction(async (transactionManager) => {
+        return await AppDataSource.transaction(async (transactionManager) => {
             const{ insertId:feedId } = await transactionManager.query(`
                 INSERT INTO feeds (
                     user_id,
@@ -90,7 +90,8 @@ const { AppDataSource } = require("./dataSource");
                         [imageUrl[i], feedId]
                     );
                 }
-            })
+                return { id: feedId, content, challenge, imageUrl };
+            });
           }   
 
     // 작성한 피드 개별 삭제
