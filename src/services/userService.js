@@ -1,6 +1,6 @@
 const moment = require("moment");
 
-const { userDao, subscribeDao, healthInfoDao, genderDao } = require("../models");
+const { userDao, subscribeDao, healthInfoDao, genderDao, orderListDao } = require("../models");
 const { AppDataSource } = require("../models/dataSource");
 const { throwError } = require("../utils/throwError");
 const { validateUserInfo, validateMaxOrEqualValue } = require("../utils/validateInput");
@@ -58,7 +58,17 @@ const updateUser = async (
   });
 };
 
-const signup = async (nickname, height, weight, skeletalMuscleMass, goalWeight, bodyFat, age, gender, user) => {
+const signup = async (
+  nickname,
+  height,
+  weight,
+  skeletalMuscleMass,
+  goalWeight,
+  bodyFat,
+  age,
+  gender,
+  user
+) => {
   await AppDataSource.transaction(async () => {
     if (!user.isNew) throwError(401, "NOT_NEW_USER");
 
@@ -79,7 +89,15 @@ const signup = async (nickname, height, weight, skeletalMuscleMass, goalWeight, 
     const subscribeId = subscribe.insertId;
     const birthYear = now.format("YYYY") - age;
     const userId = user.id;
-    await userDao.updateUserForSignup(nickname, height, goalWeight, birthYear, existingGender.id, subscribeId, userId);
+    await userDao.updateUserForSignup(
+      nickname,
+      height,
+      goalWeight,
+      birthYear,
+      existingGender.id,
+      subscribeId,
+      userId
+    );
 
     const bmi = (weight / (height / 100) ** 2).toFixed(2);
     await healthInfoDao.createHealthInfo(weight, skeletalMuscleMass, bmi, bodyFat, userId);
@@ -91,6 +109,23 @@ const checkDuplicatedNickname = async (nickname) => {
 
   const existingUser = await userDao.findUserByNickname(nickname);
   if (existingUser) throwError(409, "DUPLICATED_NICKNAME");
+};
+
+const getOrderList = async (id, before) => {
+  let filterDate = new Date();
+
+  if (before == undefined || !before) {
+    filterDate = null;
+  } else if (before == 1) {
+    filterDate.setMonth(filterDate.getMonth() - 1);
+  } else if (before == 6) {
+    filterDate.setMonth(filterDate.getMonth() - 6);
+  } else if (before == 12) {
+    filterDate.setMonth(filterDate.getMonth() - 12);
+  }
+
+  const orderList = await orderListDao(id, filterDate);
+  return orderList;
 };
 
 const getUserInfo = async (userId) => {
@@ -105,6 +140,7 @@ module.exports = {
   updateUser,
   signup,
   checkDuplicatedNickname,
+  getOrderList,
   getUserInfo,
   getUserGrade,
 };
