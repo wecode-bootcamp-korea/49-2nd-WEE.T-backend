@@ -94,6 +94,103 @@ describe("Log in to Kakao Social", () => {
   });
 });
 
+describe("Log in to Naver Social", () => {
+  let app;
+  const mockAccessToken = "fake_access_token";
+
+  beforeAll(async () => {
+    app = createApp();
+    await AppDataSource.initialize();
+
+    await AppDataSource.query(
+      `
+      INSERT INTO socials (
+        name
+      ) VALUES ("test")
+      `
+    );
+
+    const social = await AppDataSource.query(
+      `
+      INSERT INTO socials (
+        name
+      ) VALUES ("test2")
+      `
+    );
+    const socialId = social.insertId;
+
+    const user = await AppDataSource.query(
+      `
+      INSERT INTO users (
+        email,
+        sns_id,
+        social_id
+        ) VALUES ("test@email.com", 13123214, ${socialId})
+        `
+    );
+
+    nock("https://nid.naver.com").persist().post("/oauth2.0/token").reply(200, {
+      access_token: mockAccessToken,
+    });
+  });
+
+  afterAll(async () => {
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=0");
+    await AppDataSource.query(`TRUNCATE users`);
+    await AppDataSource.query(`TRUNCATE socials`);
+    await AppDataSource.query("SET FOREIGN_KEY_CHECKS=1");
+
+    await AppDataSource.destroy();
+  });
+
+  test("SUCCESS: Sign up Naver", async () => {
+    nock("https://openapi.naver.com")
+      .get("/v1/nid/me")
+      .matchHeader("authorization", `Bearer ${mockAccessToken}`)
+      .reply(200, {
+        resultcode: "00",
+        message: "success",
+        response: {
+          id: 123,
+          email: "fake@email.com",
+        },
+      });
+
+    const res = await request(app)
+      .get("/auth/naver/login")
+      .query({
+        code: "fakecode",
+      })
+      .expect(201);
+    expect(res.body.message).toEqual("LOGIN_SUCCESS");
+    expect(res.body.data).toHaveProperty("accessToken");
+    expect(res.body.data.isNew).toEqual(true);
+  });
+
+  test("SUCCESS: Sign in Naver", async () => {
+    nock("https://openapi.naver.com")
+      .get("/v1/nid/me")
+      .reply(200, {
+        resultcode: "00",
+        message: "success",
+        response: {
+          id: 13123214,
+          email: "test@email.com",
+        },
+      });
+
+    const res = await request(app)
+      .get("/auth/naver/login")
+      .query({
+        code: "fakecode",
+      })
+      .expect(200);
+    expect(res.body.message).toEqual("LOGIN_SUCCESS");
+    expect(res.body.data).toHaveProperty("accessToken");
+    expect(res.body.data.isNew).toEqual(false);
+  });
+});
+
 describe("Sign in social Enter additional information", () => {
   let app;
   let userId;
