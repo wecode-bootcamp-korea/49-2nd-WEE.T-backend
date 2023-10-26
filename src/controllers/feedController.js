@@ -2,7 +2,7 @@ const { feedService } = require("../services");
 const { keyCheck } = require("../utils/keyCheck");
 
 const getFeed = async(req, res) => {
-    const user = req.user.id;
+    const user = req.user ? req.user.id : 0;
     const { page = 1 } = req.query;
     const limit = 10;
     const feedData = await feedService.getFeed(user, limit, page);
@@ -41,6 +41,20 @@ const deleteFeed = async(req, res) => {
     });
 };
 
+const getByFeedId = async(req, res) => {
+    const user = req.user.id;
+    const feedId = req.params.feedId;
+    console.log(user, feedId);
+    keyCheck ({user, feedId});
+
+    const getByFeedId = await feedService.getFeedById(feedId, user);
+
+    return res.status(200).json({
+        message : "READ_SUCCESS",
+        data : getByFeedId,
+    })
+}
+
 const updateFeed = async(req, res) => {
     const user = req.user.id;
     const feedId = req.params.feedId;
@@ -73,6 +87,7 @@ const feedRankingByFeedCount = async(req, res) => {
 module.exports = {
     getFeed,
     addFeed,
+    getByFeedId,
     deleteFeed,
     updateFeed,
     feedRankingByFeedCount,

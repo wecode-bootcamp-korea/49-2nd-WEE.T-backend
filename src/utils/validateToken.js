@@ -25,24 +25,22 @@ const permitCheck = (method, endPoint) => {
 
 const validateToken = async (req, res, next) => {
   const accessToken = req.headers.authorization;
-
   const isNotValidToken = await client.get(accessToken ?? "");
   if (isNotValidToken) return res.status(401).json({ message: "UNAUTHORIZED" });
-
+  
   passport.authenticate("jwt", { session: false }, (err, user, info) => {
     const message = info?.expiredAt ? info.message.toUpperCase().replaceAll(" ", "_") : "UNAUTHORIZED";
 
     if(!user) {
       if (permitCheck(req.method, req.originalUrl)){
-        req.user = user;
-       return next();
-    }
-
+        return next();
+      }
+      
       return res.status(401).json({ message });
     }
-
+    
     req.user = user;
-
+    
     next();
   })(req, res, next);
 };

@@ -2,8 +2,6 @@ const { feedDao } = require("../models");
 const { throwError } = require("../utils/throwError");
 
 const getFeed = async(userId, limit, page) => {
-
-
     const getFeedList= await feedDao.getFeeds(userId, limit, page);
     const feedCount = await feedDao.getFeedCount();
 
@@ -28,6 +26,12 @@ const deleteFeed = async(userId, feedId) => {
         throwError (400, "CHALLENGE_ERROR");
     }
     await feedDao.deleteFeeds(feedId);
+}
+
+const getFeedById = async(feedId, userId) => {
+    const feedList = await feedDao.getFeedById(feedId);
+    
+    return { feedList };
 }
 
 const updateFeed = async(user, newContent, newImage, feedId, imageId) => {
@@ -59,6 +63,7 @@ module.exports = {
     getFeed,
     addFeed,
     deleteFeed,
+    getFeedById,
     updateFeed,
     feedRankingByFeedCount,
 }

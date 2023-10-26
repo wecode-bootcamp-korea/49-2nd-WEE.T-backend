@@ -20,6 +20,7 @@ const jwtStrategyConfig = new JwtStrategy(
   async (jwt_payload, done) => {
     const existingUser = await userDao.findUserById(jwt_payload.id);
 
+    console.log(existingUser);
     if (!existingUser) {
       return done(null, false);
     }
