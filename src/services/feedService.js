@@ -11,16 +11,16 @@ const getFeed = async(userId, limit, page) => {
 };
 
 const addFeed = async(userId, content, challenge, imageUrl) => {
-    if (imageUrl.length === 0 || imageUrl.length > 3) throw new Error("이미지는 1개에서 3개 사이어야 합니다.")
-    
-    imageUrl = [];
-    
+    if (imageUrl.length === 0 || imageUrl.length > 3) {
+        throw new Error("이미지는 1개에서 3개 사이어야 합니다.")
+    }
     const addFeed = await feedDao.addFeeds(userId, content, challenge, imageUrl)    ;
     return { addFeed };
 };
 
 const deleteFeed = async(userId, feedId) => {
     const feed = await feedDao.getByFeedId(feedId);
+    // 토큰값 컨트롤에서 가져와서 비교
     if(userId !== feed.user_id) {
         throwError (400, "FEED_CONNECTION_ERROR");
     }
