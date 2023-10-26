@@ -28,7 +28,7 @@ const deleteFeed = async(userId, feedId) => {
     await feedDao.deleteFeeds(feedId);
 }
 
-const getFeedById = async(feedId, userId) => {
+const getFeedById = async(feedId) => {
     const feedList = await feedDao.getFeedById(feedId);
     
     return { feedList };
