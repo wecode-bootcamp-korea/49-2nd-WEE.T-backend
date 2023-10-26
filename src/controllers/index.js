@@ -5,6 +5,7 @@ const feedController = require("./feedController");
 const trainingController = require("./trainingController");
 const statisticsController = require("./statisticsController");
 const dietController = require("./dietController");
+const commentController = require("./commentController");
 
 module.exports = {
   authController,
@@ -14,4 +15,5 @@ module.exports = {
   trainingController,
   statisticsController,
   dietController,
+  commentController,
 };
