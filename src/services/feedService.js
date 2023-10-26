@@ -56,7 +56,7 @@ const updateFeed = async(user, newContent, newImage, feedId, imageId) => {
 const feedRankingByFeedCount = async() => {
     const feedRanking = await feedDao.feedRankingByFeedCount();
 
-    return { feedRanking };
+    return feedRanking ;
 }
 
 module.exports = {
