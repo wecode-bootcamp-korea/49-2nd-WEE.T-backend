@@ -51,7 +51,6 @@ const { AppDataSource } = require("./dataSource");
             `,
             [userId, limit, (page - 1) * 10]
         );
-        console.log('확인', Feeds);
         return Feeds;
     }
 
@@ -121,6 +120,30 @@ const { AppDataSource } = require("./dataSource");
             [feedId]
         );
         return feed;
+    }
+
+    // 피드 수정 호출
+    const getFeedById = async(feedId) => {
+        const [feedList] = await AppDataSource.query(`
+            SELECT
+                f.id AS id,
+                f.content,
+                f.is_challenge AS challenge,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        "url" , fi.url
+                    )
+                ) AS imgurl
+            FROM
+                feeds f
+            LEFT JOIN
+                feed_images fi ON f.id = fi.feed_id
+            WHERE
+                f.id = ? ;
+        `,
+            [feedId]
+        )
+        return feedList;
     }
 
     // 글 수정
@@ -218,6 +241,7 @@ module.exports = {
     addFeeds,
     deleteFeeds,
     getByFeedId,
+    getFeedById,
     updateFeeds,
     deleteFeedImages,
     updateImages,

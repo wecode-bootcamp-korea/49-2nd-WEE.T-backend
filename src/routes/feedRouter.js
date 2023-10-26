@@ -9,6 +9,7 @@ feedRouter.get('', validateToken, asyncWrap(feedController.getFeed));
 feedRouter.post('', validateToken, imageUploader.array('imageUrl'), asyncWrap(feedController.addFeed));
 feedRouter.delete('/:feedId', validateToken, asyncWrap(feedController.deleteFeed));
 feedRouter.put('/:feedId', validateToken, imageUploader.array('imageUrl'), asyncWrap(feedController.updateFeed));
+feedRouter.get('/:feedId', validateToken, asyncWrap(feedController.getByFeedId));
 feedRouter.get('/rank', asyncWrap(feedController.feedRankingByFeedCount));
 
 module.exports = feedRouter;
