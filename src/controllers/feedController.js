@@ -42,12 +42,10 @@ const deleteFeed = async(req, res) => {
 };
 
 const getByFeedId = async(req, res) => {
-    const user = req.user.id;
     const feedId = req.params.feedId;
-    console.log(user, feedId);
-    keyCheck ({user, feedId});
+    keyCheck ({feedId});
 
-    const getByFeedId = await feedService.getFeedById(feedId, user);
+    const getByFeedId = await feedService.getFeedById(feedId);
 
     return res.status(200).json({
         message : "READ_SUCCESS",
