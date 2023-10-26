@@ -1,11 +1,11 @@
 const { subscribeService } = require("../services");
-const { subscriptionCheck, showSubscription } = subscribeService;
+const { throwError } = require("../utils/throwError");
 
 const getSubscriptionPlans = async (req, res) => {
-  const subscription = await showSubscription();
+  const subscription = await subscribeService.showSubscription();
 
   res.status(200).json({
-    status: await subscriptionCheck(req.user.id),
+    status: await subscribeService.subscriptionCheck(req.user.id),
     data: subscription.map((item) => {
       return {
         subscribeId: item.id,
@@ -25,4 +25,22 @@ const createOrder = async (req, res) => {
   });
 };
 
-module.exports = { getSubscriptionPlans, createOrder };
+const updateOrder = async (req, res) => {
+  if (
+    !req.body.orderId ||
+    !req.body.paymentsId ||
+    !req.body.subscribeId ||
+    !req.body.requestedAt ||
+    !req.body.approvedAt
+  ) {
+    throwError(400, "INVALID_KEY");
+  }
+
+  await subscribeService.updateOrder(req.user.id, req.body);
+
+  res.status(200).json({
+    message: "CREATE_CHECKOUT_SUCCESS",
+  });
+};
+
+module.exports = { getSubscriptionPlans, createOrder, updateOrder };

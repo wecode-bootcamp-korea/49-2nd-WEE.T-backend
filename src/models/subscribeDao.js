@@ -30,6 +30,18 @@ const getSubscription = async () => {
   return query;
 };
 
+const getOrderById = async (userID, orderId) => {
+  const [query] = await AppDataSource.query(
+    `
+    SELECT o.user_id, o.order_id
+    FROM orders o
+    WHERE o.user_id = ? AND o.order_id = ?;
+  `,
+    [userID, orderId]
+  );
+  return query;
+};
+
 const createOrder = async (userId, orderNumber) => {
   const query = await AppDataSource.query(
     `
@@ -41,4 +53,22 @@ const createOrder = async (userId, orderNumber) => {
   return orderNumber;
 };
 
-module.exports = { createSubscribe, getSubscribeInfoByUserId, getSubscription, createOrder };
+const updateOrder = async (userId, { orderId, paymentsId, subscribeId }) => {
+  await AppDataSource.query(
+    `
+    UPDATE orders
+    SET payment_id = ?, subscribes_id = ?
+    WHERE user_id = ? AND order_id = ?;
+  `,
+    [paymentsId, subscribeId, userId, orderId]
+  );
+};
+
+module.exports = {
+  createSubscribe,
+  getSubscribeInfoByUserId,
+  getSubscription,
+  createOrder,
+  updateOrder,
+  getOrderById,
+};
