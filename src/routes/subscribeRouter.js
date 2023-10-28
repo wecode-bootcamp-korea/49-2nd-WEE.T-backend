@@ -6,5 +6,6 @@ const subscribeRouter = express.Router();
 
 subscribeRouter.get("/", validateToken, asyncWrap(subscribeController.getSubscriptionPlans));
 subscribeRouter.get("/checkout", validateToken, asyncWrap(subscribeController.createOrder));
+subscribeRouter.post("/checkout", validateToken, asyncWrap(subscribeController.updateOrder));
 
 module.exports = subscribeRouter;

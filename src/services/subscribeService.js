@@ -1,4 +1,5 @@
 const { subscribeDao } = require("../models");
+const { throwError } = require("../utils/throwError");
 
 const subscriptionCheck = async (id) => {
   const [subscriptionDuration] = await subscribeDao.getSubscribeInfoByUserId(id);
@@ -37,4 +38,13 @@ const createOrder = async (userId) => {
   return await subscribeDao.createOrder(userId, orderNumber);
 };
 
-module.exports = { subscriptionCheck, showSubscription, createOrder };
+const updateOrder = async (userId, req) => {
+  const exiestOrderId = await subscribeDao.getOrderById(userId, req.orderId);
+
+  if (!exiestOrderId) {
+    throwError(400, "NOT_FOUNDED_ORDER_ID");
+  }
+  return await subscribeDao.updateOrder(userId, req);
+};
+
+module.exports = { subscriptionCheck, showSubscription, createOrder, updateOrder };
